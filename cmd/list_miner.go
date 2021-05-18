@@ -9,8 +9,16 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 )
+
+var listFlags = []cli.Flag{
+	cli.StringFlag{
+		Name:  "region",
+		Usage: "list miners in specific region",
+	},
+}
 
 type minerResponse struct {
 	Data struct {
@@ -42,10 +50,11 @@ func (m MinerMessage) JSON() string {
 }
 
 func (m MinerMessage) String() string {
-	message := fmt.Sprintf("%*s %*s %*s %*s %*s %*s %*s %s",
+	message := fmt.Sprintf("%*s %*s %*s %*s %*s %*s %*s %*s %s",
 		-10, m.MinerID,
 		-8, m.Status,
 		-6, fmt.Sprintf("%v", m.Score),
+		-8, m.Location,
 		-15, m.AdjustedPower,
 		-30, m.Price,
 		-20, m.VerifiedPrice,
@@ -54,18 +63,22 @@ func (m MinerMessage) String() string {
 	return message
 }
 
-var listMinerCmd = cli.Command{
-	Name:            "miner",
-	Usage:           "get miner info from swan",
-	Action:          mainSwanListMiner,
-	Before:          setGlobalsFromContext,
-	Flags:           globalFlags,
-	HideHelpCommand: true,
-	Subcommands:     adminServiceSubcommands,
-}
-
-const (
+var (
+	listMinerCmd = cli.Command{
+		Name:            "miner",
+		Usage:           "get miner info from swan",
+		Action:          mainSwanListMiner,
+		Before:          setGlobalsFromContext,
+		HideHelpCommand: true,
+		Flags:           append(listFlags, globalFlags...),
+		Subcommands:     adminServiceSubcommands,
+	}
+	validRegions     = []string{"Global", "Asia", "Africa", "NorthAmerica", "SouthAmerica", "Europe", "Oceania"}
 	swanMinerListUrl = "https://api.filswan.com/miners?limit=100&offset=0&status=Active&sort_by=score&order=ascending"
+	arg2Param        = map[string]string{
+		"NorthAmerica": "North America",
+		"SouthAmerica": "South America",
+	}
 )
 
 func closeResponse(resp *http.Response) {
@@ -83,10 +96,31 @@ func closeResponse(resp *http.Response) {
 	}
 }
 
+func checkListArgs(cliCtx *cli.Context) string {
+	regionArg := cliCtx.String("region")
+	if len(regionArg) > 0 {
+		for _, region := range validRegions {
+			if regionArg == region {
+				if regionArg == "NorthAmerica" || regionArg == "SouthAmerica" {
+					regionArg = arg2Param[regionArg]
+				}
+				return regionArg
+			}
+		}
+		fatalIf(errInvalidArgument().Trace(regionArg), "Please provide a region in %s", validRegions)
+	}
+	return ""
+}
+
 // mainSwanList is the handle for "mc list" command.
 func mainSwanListMiner(cliCtx *cli.Context) error {
 	ctx, cancelList := context.WithCancel(globalContext)
 	defer cancelList()
+
+	region := checkListArgs(cliCtx)
+	if len(region) > 0 {
+		swanMinerListUrl = fmt.Sprintf("%s%s%s", swanMinerListUrl, "&location=", url.QueryEscape(region))
+	}
 
 	client := http.Client{Timeout: 5 * time.Second}
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, swanMinerListUrl, nil)
@@ -119,6 +153,7 @@ func mainSwanListMiner(cliCtx *cli.Context) error {
 		VerifiedPrice: "VerifiedPrice",
 		MinPieceSize:  "Min Piece Size",
 		MaxPieceSize:  "Max Piece Size",
+		Location:      "Region",
 	}
 	printMsg(messageTitle)
 

@@ -112,7 +112,7 @@ func checkListArgs(cliCtx *cli.Context) string {
 	return ""
 }
 
-// mainSwanList is the handle for "mc list" command.
+// mainSwanList is the handle for "mc miner" command.
 func mainSwanListMiner(cliCtx *cli.Context) error {
 	ctx, cancelList := context.WithCancel(globalContext)
 	defer cancelList()

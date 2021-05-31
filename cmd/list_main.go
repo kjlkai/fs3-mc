@@ -12,6 +12,7 @@ var listCmd = cli.Command{
 	Action:       mainSwanList,
 	OnUsageError: onUsageError,
 	Before:       setGlobalsFromContext,
+	Flags:        append(lsFlags, globalFlags...),
 	Subcommands:  listCmdSubcommands,
 }
 

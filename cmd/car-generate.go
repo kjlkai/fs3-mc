@@ -1,14 +1,35 @@
 package cmd
 
 import (
+	"context"
+	"github.com/filedrive-team/go-graphsplit"
 	"github.com/minio/cli"
-	"github.com/minio/mc/pkg/graphsplit"
+	"golang.org/x/xerrors"
 )
 
 var carGenerateCmd = cli.Command{
-	Name:         "generate",
-	Usage:        "Generate CAR files of the specified size",
-	Action:       graphsplit.MainCarGenerate,
+	Name:  "generate",
+	Usage: "Generate CAR files of the specified size",
+	Action: func(c *cli.Context) error {
+		ctx := context.Background()
+		parallel := c.Uint("parallel")
+		sliceSize := c.Uint64("slice-size")
+		parentPath := c.String("parent-path")
+		carDir := c.String("car-dir")
+		graphName := c.String("graph-name")
+		if sliceSize == 0 {
+			return xerrors.Errorf("Unexpected! Slice size has been set as 0")
+		}
+
+		targetPath := c.Args().First()
+		var cb graphsplit.GraphBuildCallback
+		if c.Bool("save-manifest") {
+			cb = graphsplit.CSVCallback(carDir)
+		} else {
+			cb = graphsplit.ErrCallback()
+		}
+		return graphsplit.Chunk(ctx, int64(sliceSize), parentPath, targetPath, carDir, graphName, int(parallel), cb)
+	},
 	OnUsageError: onUsageError,
 	Before:       setGlobalsFromContext,
 	Flags:        append(carGenerateFlags, globalFlags...),

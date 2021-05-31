@@ -7,19 +7,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.10.0
+	github.com/filedrive-team/go-graphsplit v0.3.0
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
-	github.com/ipfs/go-blockservice v0.1.4
-	github.com/ipfs/go-cid v0.0.7
-	github.com/ipfs/go-datastore v0.4.5
-	github.com/ipfs/go-ipfs-blockstore v1.0.3
-	github.com/ipfs/go-ipfs-chunker v0.0.5
-	github.com/ipfs/go-ipfs-exchange-offline v0.0.1
-	github.com/ipfs/go-ipfs-files v0.0.8
-	github.com/ipfs/go-ipld-format v0.2.0
-	github.com/ipfs/go-merkledag v0.3.2
-	github.com/ipfs/go-unixfs v0.2.6
-	github.com/ipld/go-car v0.3.0
-	github.com/ipld/go-ipld-prime v0.9.0
 	github.com/json-iterator/go v1.1.11
 	github.com/klauspost/compress v1.12.2
 	github.com/mattn/go-ieproxy v0.0.1
@@ -36,7 +25,6 @@ require (
 	github.com/pkg/xattr v0.4.1
 	github.com/posener/complete v1.2.3
 	github.com/prometheus/client_golang v1.8.0
-	github.com/prometheus/common v0.14.0
 	github.com/rjeczalik/notify v0.9.2
 	github.com/rs/xid v1.2.1
 	github.com/shirou/gopsutil/v3 v3.21.3
@@ -50,3 +38,5 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 	maze.io/x/duration v0.0.0-20160924141736-faac084b6075
 )
+
+replace google.golang.org/grpc => google.golang.org/grpc v1.29.1

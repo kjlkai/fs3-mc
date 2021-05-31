@@ -7,7 +7,7 @@ var carCmdSubcommands = []cli.Command{
 }
 
 var carCmd = cli.Command{
-	Name:         "list",
+	Name:         "car",
 	Usage:        "list swan info",
 	Action:       mainCar,
 	OnUsageError: onUsageError,

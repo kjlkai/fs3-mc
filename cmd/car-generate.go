@@ -6,8 +6,8 @@ import (
 )
 
 var carGenerateCmd = cli.Command{
-	Name:         "list",
-	Usage:        "list swan info",
+	Name:         "generate",
+	Usage:        "Generate CAR files of the specified size",
 	Action:       graphsplit.MainCarGenerate,
 	OnUsageError: onUsageError,
 	Before:       setGlobalsFromContext,

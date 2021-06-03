@@ -36,14 +36,14 @@ var carGenerateCmd = cli.Command{
 }
 
 var carGenerateFlags = []cli.Flag{
-	cli.Int64Flag{
+	cli.Uint64Flag{
 		Name:  "slice-size",
 		Value: 17179869184, // 16G
 		Usage: "specify chunk piece size",
 	},
-	cli.IntFlag{
+	cli.UintFlag{
 		Name:  "parallel",
-		Value: 4,
+		Value: 2,
 		Usage: "specify how many number of goroutines runs when generate file node",
 	},
 	cli.StringFlag{
@@ -58,5 +58,9 @@ var carGenerateFlags = []cli.Flag{
 	cli.StringFlag{
 		Name:  "car-dir",
 		Usage: "specify output CAR directory",
+	},
+	cli.BoolTFlag{
+		Name:  "save-manifest",
+		Usage: "create a mainfest.csv in car-dir to save mapping of data-cids and slice names",
 	},
 }

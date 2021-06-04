@@ -23,11 +23,9 @@ var carGenerateCmd = cli.Command{
 
 		targetPath := c.Args().First()
 		var cb graphsplit.GraphBuildCallback
-		if c.Bool("save-manifest") {
-			cb = graphsplit.CSVCallback(carDir)
-		} else {
-			cb = graphsplit.ErrCallback()
-		}
+
+		cb = graphsplit.CommPCallback(carDir)
+
 		return graphsplit.Chunk(ctx, int64(sliceSize), parentPath, targetPath, carDir, graphName, int(parallel), cb)
 	},
 	OnUsageError: onUsageError,

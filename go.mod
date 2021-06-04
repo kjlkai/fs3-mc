@@ -7,7 +7,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.10.0
-	github.com/filedrive-team/go-graphsplit v0.3.0
+	github.com/filedrive-team/go-graphsplit v0.4.0
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/json-iterator/go v1.1.11
 	github.com/klauspost/compress v1.12.2
@@ -39,4 +39,7 @@ require (
 	maze.io/x/duration v0.0.0-20160924141736-faac084b6075
 )
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
+replace (
+google.golang.org/grpc => google.golang.org/grpc v1.29.1
+github.com/filecoin-project/filecoin-ffi => ./extern/filecoin-ffi
+)

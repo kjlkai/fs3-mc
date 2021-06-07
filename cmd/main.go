@@ -437,6 +437,7 @@ var appCmds = []cli.Command{
 	updateCmd,
 	listCmd,
 	carCmd,
+	sendCmd,
 }
 
 func registerApp(name string) *cli.App {

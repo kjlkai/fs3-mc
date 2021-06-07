@@ -1,12 +1,17 @@
 package cmd
 
 import (
+	"context"
+	"flag"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/minio/cli"
+	"github.com/minio/mc/pkg/probe"
 	csv "github.com/minio/minio/pkg/csvparser"
 	"math/big"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -59,7 +64,18 @@ func mainSend(ctx *cli.Context) error {
 		dealConfig.Duration = strconv.FormatUint(uint64(calculateDuration(duration)), 10)
 		dealConfig.Cost = calculateCost(price, dealConfig.PieceSize).String()
 		proposeOfflineDeal(dealConfig)
-		writeCsv(fmt.Sprintf("%s.out", inputPath), *dealConfig)
+
+		asbInputPath, err := filepath.Abs(inputPath)
+		if err != nil {
+			fatalIf(errInvalidArgument().Trace(inputPath), "please provide a valid input path")
+		}
+		uid := uuid.New()
+		uidStr := strings.Split(uid.String(), "-")[0]
+		csvParentPath := filepath.Dir(asbInputPath)
+		dealCsvPath := filepath.Join(csvParentPath, fmt.Sprintf("dealMetadata-%s.csv", uidStr))
+
+		writeCsv(dealCsvPath, *dealConfig)
+		uploadCsv(dealCsvPath, "swan/csv", ctx)
 	}
 
 	return nil
@@ -229,6 +245,29 @@ func writeCsv(filePath string, deal OfflineDeal) {
 	writer := csv.NewWriter(file)
 	err = writer.WriteAll(records)
 	if err != nil {
-		errorIf(errDummy(), err.Error())
+		errorIf(probe.NewError(err).Untrace(), err.Error())
+	}
+}
+
+func uploadCsv(csvPath string, targetFolder string, cliCtx *cli.Context) {
+
+	ctx, cancelCopy := context.WithCancel(globalContext)
+	defer cancelCopy()
+
+	encKeyDB, err := getEncKeys(cliCtx)
+	fatalIf(err, "Unable to parse encryption keys.")
+
+	flagSet := flag.NewFlagSet("copy", flag.ExitOnError)
+	flagSet.Parse([]string{csvPath, targetFolder})
+	context := cli.NewContext(cliCtx.App, flagSet, cliCtx)
+
+	var session *sessionV8
+
+	e := doCopySession(ctx, cancelCopy, context, session, encKeyDB, false)
+	if session != nil {
+		session.Delete()
+	}
+	if e != nil {
+		fatalIf(probe.NewError(e).Untrace(), e.Error())
 	}
 }

@@ -22,6 +22,7 @@ var (
 	defaultDuration = 365
 	epochPerHour    = 120
 	GiBToByte       = 1024 * 1024 * 1024
+	aliasName       = "swanminio"
 )
 
 type OfflineDeal struct {
@@ -38,7 +39,7 @@ type OfflineDeal struct {
 	Filename      string
 }
 
-func NewDealConfig() *OfflineDeal {
+func NewOfflineDeal() *OfflineDeal {
 	return &OfflineDeal{FastRetrieval: true}
 }
 
@@ -56,6 +57,14 @@ func mainSend(ctx *cli.Context) error {
 
 	wallet, start, duration, miner, inputPath, price := checkSendArgs(ctx)
 	dealConfigs := readCsv(inputPath)
+	asbInputPath, err := filepath.Abs(inputPath)
+	if err != nil {
+		fatalIf(errInvalidArgument().Trace(inputPath), "please provide a valid input path")
+	}
+	uid := uuid.New()
+	uidStr := strings.Split(uid.String(), "-")[0]
+	csvParentPath := filepath.Dir(asbInputPath)
+	dealCsvPath := filepath.Join(csvParentPath, fmt.Sprintf("dealMetadata-%s.csv", uidStr))
 
 	for _, dealConfig := range dealConfigs {
 		dealConfig.MinerId = miner
@@ -64,18 +73,11 @@ func mainSend(ctx *cli.Context) error {
 		dealConfig.Duration = strconv.FormatUint(uint64(calculateDuration(duration)), 10)
 		dealConfig.Cost = calculateCost(price, dealConfig.PieceSize).String()
 		proposeOfflineDeal(dealConfig)
-
-		asbInputPath, err := filepath.Abs(inputPath)
-		if err != nil {
-			fatalIf(errInvalidArgument().Trace(inputPath), "please provide a valid input path")
-		}
-		uid := uuid.New()
-		uidStr := strings.Split(uid.String(), "-")[0]
-		csvParentPath := filepath.Dir(asbInputPath)
-		dealCsvPath := filepath.Join(csvParentPath, fmt.Sprintf("dealMetadata-%s.csv", uidStr))
-
 		writeCsv(dealCsvPath, *dealConfig)
-		uploadCsv(dealCsvPath, "swan/csv", ctx)
+	}
+	upload := ctx.Bool("upload")
+	if upload {
+		uploadCsv(dealCsvPath, fmt.Sprintf("%s/swan", aliasName), ctx)
 	}
 
 	return nil
@@ -106,6 +108,10 @@ var sendFlags = []cli.Flag{
 		Value: "0",
 		Usage: "specify the deal price for each GiB of file, default: 0",
 	},
+	cli.BoolFlag{
+		Name:  "upload",
+		Usage: "specify whether upload the generated csv to minio or not, default: false",
+	},
 }
 
 func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.Float) {
@@ -125,6 +131,7 @@ func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.F
 	duration := ctx.Uint("duration")
 	input := strings.TrimSpace(ctx.String("input"))
 	price := ctx.String("price")
+	upload := ctx.Bool("upload")
 
 	if len(input) == 0 {
 		fatalIf(errInvalidArgument().Trace(input), "please provide a input path")
@@ -146,6 +153,20 @@ func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.F
 	if err != nil {
 		fatalIf(errInvalidArgument(), "please provide a valid price")
 	}
+	if upload {
+		AccessKey := os.Getenv("ACCESS_KEY")
+		SecretKey := os.Getenv("SECRET_KEY")
+		Endpoint := os.Getenv("ENDPOINT")
+		if !(strings.HasPrefix(Endpoint, "http") || strings.HasPrefix(Endpoint, "https")) {
+			fatalIf(errInvalidArgument().Trace(Endpoint), "endpoint should start with 'http' or 'https'")
+		}
+		if len(AccessKey) == 0 {
+			fatalIf(errInvalidArgument().Trace(AccessKey), "$ACCESS_KEY not provided")
+		}
+		if len(SecretKey) == 0 {
+			fatalIf(errInvalidArgument().Trace(SecretKey), "$SECRET_KEY not provided")
+		}
+	}
 
 	return wallet, start, duration, miner, input, priceDecimal
 }
@@ -165,11 +186,8 @@ func calculateCost(price *big.Float, pieceSize string) *big.Float {
 	pieceSizeInt := new(big.Float)
 	pieceSizeInt.SetString(pieceSize)
 	pieceSizeInGiB := pieceSizeInt.Quo(pieceSizeInt, big.NewFloat(float64(GiBToByte))).Quo(pieceSizeInt, big.NewFloat(127)).Mul(pieceSizeInt, big.NewFloat(128))
-	fmt.Println(pieceSizeInGiB.String())
-	fmt.Println(price.String())
 
 	cost := pieceSizeInGiB.Mul(pieceSizeInGiB, price)
-	fmt.Println(cost)
 	return cost
 }
 
@@ -191,7 +209,7 @@ func proposeOfflineDeal(config *OfflineDeal) {
 	if err != nil {
 		errorIf(errDummy(), err.Error())
 	} else {
-		config.DealCid = string(stdout)
+		config.DealCid = strings.TrimSuffix(string(stdout), "\n")
 	}
 }
 
@@ -213,13 +231,15 @@ func readCsv(filepath string) []*OfflineDeal {
 			// skip header line
 			continue
 		}
-		dealConfig := &OfflineDeal{
-			DataCid:   line[0],
-			Filename:  line[1],
-			PieceCid:  line[2],
-			PieceSize: line[3],
-		}
-		dealConfigs = append(dealConfigs, dealConfig)
+
+		offlineDeal := NewOfflineDeal()
+
+		offlineDeal.DataCid = line[0]
+		offlineDeal.Filename = line[1]
+		offlineDeal.PieceCid = line[2]
+		offlineDeal.PieceSize = line[3]
+
+		dealConfigs = append(dealConfigs, offlineDeal)
 	}
 	return dealConfigs
 }
@@ -232,7 +252,7 @@ func writeCsv(filePath string, deal OfflineDeal) {
 		file, err = os.Create(filePath)
 		records = append(records, header)
 	} else {
-		file, err = os.Create(filePath)
+		file, err = os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
 	}
 	if err != nil {
 		errorIf(errDummy(), err.Error())
@@ -249,7 +269,22 @@ func writeCsv(filePath string, deal OfflineDeal) {
 	}
 }
 
+func makeFinalEnv(accessKey, secretKey, endpoint string) string {
+	protocol := "http"
+	if strings.HasPrefix(endpoint, "https") {
+		protocol = "https"
+	}
+	url := strings.Split(endpoint, "://")[1]
+	return fmt.Sprintf("%s://%s:%s@%s", protocol, accessKey, secretKey, url)
+}
+
 func uploadCsv(csvPath string, targetFolder string, cliCtx *cli.Context) {
+
+	AccessKey := os.Getenv("ACCESS_KEY")
+	SecretKey := os.Getenv("SECRET_KEY")
+	Endpoint := os.Getenv("ENDPOINT")
+
+	os.Setenv(fmt.Sprintf("MC_HOST_%s", aliasName), makeFinalEnv(AccessKey, SecretKey, Endpoint))
 
 	ctx, cancelCopy := context.WithCancel(globalContext)
 	defer cancelCopy()

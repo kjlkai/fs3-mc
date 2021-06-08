@@ -111,7 +111,7 @@ var sendFlags = []cli.Flag{
 	},
 	cli.BoolFlag{
 		Name:  "upload",
-		Usage: "specify whether upload the generated csv to minio or not, default: false",
+		Usage: "specify whether upload the generated csv to minio or not, default: false\nIn order to connect to your minio instance, you need to set environment variables of ACCESS_KEY, SECRET_KEY and ENDPOINT",
 	},
 	cli.StringFlag{
 		Name:  "minio-bucket",
@@ -301,11 +301,39 @@ func uploadCsv(csvPath string, targetFolder string, cliCtx *cli.Context) {
 
 	flagSet := flag.NewFlagSet("copy", flag.ExitOnError)
 	flagSet.Parse([]string{csvPath, targetFolder})
-	context := cli.NewContext(cliCtx.App, flagSet, cliCtx)
+	minioCtx := cli.NewContext(cliCtx.App, flagSet, cliCtx)
+
+	// make bucket if not exist, reference mb-main.go
+	{
+		defaultRegion := "us-east-1"
+		targetURL := targetFolder
+		clnt, err := newClient(targetURL)
+		if err != nil {
+			errorIf(err.Trace(targetURL), "Invalid target `"+targetURL+"`.")
+			exitStatus(globalErrorExitStatus)
+		}
+
+		ctx, cancelMakeBucket := context.WithCancel(globalContext)
+		defer cancelMakeBucket()
+
+		// Make bucket.
+		err = clnt.MakeBucket(ctx, defaultRegion, true, false)
+		if err != nil {
+			switch err.ToGoError().(type) {
+			case BucketNameEmpty:
+				errorIf(err.Trace(targetURL), "Unable to make bucket, please use `mc mb %s/<your-bucket-name>`.", targetURL)
+			case BucketNameTopLevel:
+				errorIf(err.Trace(targetURL), "Unable to make prefix, please use `mc mb %s/`.", targetURL)
+			default:
+				errorIf(err.Trace(targetURL), "Unable to make bucket `"+targetURL+"`.")
+			}
+			exitStatus(globalErrorExitStatus)
+		}
+	}
 
 	var session *sessionV8
 
-	e := doCopySession(ctx, cancelCopy, context, session, encKeyDB, false)
+	e := doCopySession(ctx, cancelCopy, minioCtx, session, encKeyDB, false)
 	if session != nil {
 		session.Delete()
 	}

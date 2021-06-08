@@ -77,7 +77,8 @@ func mainSend(ctx *cli.Context) error {
 	}
 	upload := ctx.Bool("upload")
 	if upload {
-		uploadCsv(dealCsvPath, fmt.Sprintf("%s/swan", aliasName), ctx)
+		bucketName := ctx.String("minio-bucket")
+		uploadCsv(dealCsvPath, fmt.Sprintf("%s/%s", aliasName, bucketName), ctx)
 	}
 
 	return nil
@@ -111,6 +112,11 @@ var sendFlags = []cli.Flag{
 	cli.BoolFlag{
 		Name:  "upload",
 		Usage: "specify whether upload the generated csv to minio or not, default: false",
+	},
+	cli.StringFlag{
+		Name:  "minio-bucket",
+		Value: "swan",
+		Usage: "specify the bucket name used in minio, default: swan",
 	},
 }
 

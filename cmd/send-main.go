@@ -211,6 +211,7 @@ func proposeOfflineDeal(config *OfflineDeal) {
 		config.Duration}
 
 	cmd := exec.Command("lotus", commandArgs...)
+	fmt.Println(cmd.String())
 	stdout, err := cmd.Output()
 	if err != nil {
 		errorIf(errDummy(), err.Error())

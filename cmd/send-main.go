@@ -56,15 +56,25 @@ var sendCmd = cli.Command{
 func mainSend(ctx *cli.Context) error {
 
 	wallet, start, duration, miner, inputPath, price := checkSendArgs(ctx)
-	dealConfigs := readCsv(inputPath)
-	asbInputPath, err := filepath.Abs(inputPath)
-	if err != nil {
-		fatalIf(errInvalidArgument().Trace(inputPath), "please provide a valid input path")
+
+	var dealConfigs []*OfflineDeal
+	dealCsvPath := ""
+	if len(inputPath) != 0 {
+		dealConfigs = readCsv(inputPath)
+		asbInputPath, err := filepath.Abs(inputPath)
+		if err != nil {
+			fatalIf(errInvalidArgument().Trace(inputPath), "please provide a valid input path")
+		}
+		uid := uuid.New()
+		uidStr := strings.Split(uid.String(), "-")[0]
+		csvParentPath := filepath.Dir(asbInputPath)
+		dealCsvPath = filepath.Join(csvParentPath, fmt.Sprintf("dealMetadata-%s.csv", uidStr))
+	} else {
+		pieceCid := strings.TrimSpace(ctx.String("piece-cid"))
+		pieceSize := strings.TrimSpace(ctx.String("piece-size"))
+		dataCid := strings.TrimSpace(ctx.String("data-cid"))
+		dealConfigs = []*OfflineDeal{{PieceCid: pieceCid, DataCid: dataCid, PieceSize: pieceSize}}
 	}
-	uid := uuid.New()
-	uidStr := strings.Split(uid.String(), "-")[0]
-	csvParentPath := filepath.Dir(asbInputPath)
-	dealCsvPath := filepath.Join(csvParentPath, fmt.Sprintf("dealMetadata-%s.csv", uidStr))
 
 	for _, dealConfig := range dealConfigs {
 		dealConfig.MinerId = miner
@@ -73,7 +83,9 @@ func mainSend(ctx *cli.Context) error {
 		dealConfig.Duration = strconv.FormatUint(uint64(calculateDuration(duration)), 10)
 		dealConfig.Cost = calculateCost(price, dealConfig.PieceSize).String()
 		proposeOfflineDeal(dealConfig)
-		writeCsv(dealCsvPath, *dealConfig)
+		if len(inputPath) != 0 {
+			writeCsv(dealCsvPath, *dealConfig)
+		}
 	}
 	upload := ctx.Bool("upload")
 	if upload {
@@ -118,6 +130,15 @@ var sendFlags = []cli.Flag{
 		Value: "swan",
 		Usage: "specify the bucket name used in minio, default: swan",
 	},
+	cli.StringFlag{
+		Name: "piece-cid",
+	},
+	cli.StringFlag{
+		Name: "piece-size",
+	},
+	cli.StringFlag{
+		Name: "data-cid",
+	},
 }
 
 func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.Float) {
@@ -135,15 +156,28 @@ func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.F
 	wallet := strings.TrimSpace(ctx.String("from"))
 	start := ctx.Uint("start")
 	duration := ctx.Uint("duration")
-	input := strings.TrimSpace(ctx.String("input"))
+	input := ""
 	price := ctx.String("price")
 	upload := ctx.Bool("upload")
 
-	if len(input) == 0 {
-		fatalIf(errInvalidArgument().Trace(input), "please provide a input path")
+	if !ctx.IsSet("input") {
+		pieceCid := strings.TrimSpace(ctx.String("piece-cid"))
+		pieceSize := strings.TrimSpace(ctx.String("piece-size"))
+		dataCid := strings.TrimSpace(ctx.String("data-cid"))
+		if len(pieceCid) == 0 || len(pieceSize) == 0 || len(dataCid) == 0 {
+			fatalIf(errInvalidArgument().Trace(), "please provide valid piece-cid, piece-size and data-cid")
+		}
+		if !isInt(pieceSize) {
+			fatalIf(errInvalidArgument().Trace(), "please provide valid piece-size")
+		}
 	} else {
-		if _, err := os.Stat(input); os.IsNotExist(err) {
-			fatalIf(errInvalidArgument().Trace(input), "please provide a valid input path")
+		input = strings.TrimSpace(ctx.String("input"))
+		if len(input) == 0 {
+			fatalIf(errInvalidArgument().Trace(input), "please provide a input path")
+		} else {
+			if _, err := os.Stat(input); os.IsNotExist(err) {
+				fatalIf(errInvalidArgument().Trace(input), "please provide a valid input path")
+			}
 		}
 	}
 	if len(wallet) == 0 {
@@ -252,7 +286,7 @@ func readCsv(filepath string) []*OfflineDeal {
 }
 func writeCsv(filePath string, deal OfflineDeal) {
 	_, err := os.Stat(filePath)
-	header := []string{"DataCid", "filename", "PieceCid", "PieceSize", "DealCid"}
+	header := []string{"data_cid", "filename", "piece_cid", "piece_size", "deal_cid", "miner_id"}
 	var records [][]string
 	var file *os.File
 	if os.IsNotExist(err) {
@@ -266,7 +300,7 @@ func writeCsv(filePath string, deal OfflineDeal) {
 	}
 	defer file.Close()
 
-	dealRecord := []string{deal.DataCid, deal.Filename, deal.PieceCid, deal.PieceSize, deal.DealCid}
+	dealRecord := []string{deal.DataCid, deal.Filename, deal.PieceCid, deal.PieceSize, deal.DealCid, deal.MinerId}
 	records = append(records, dealRecord)
 
 	writer := csv.NewWriter(file)

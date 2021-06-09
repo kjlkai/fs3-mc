@@ -88,7 +88,7 @@ func mainSend(ctx *cli.Context) error {
 		}
 	}
 	upload := ctx.Bool("upload")
-	if upload {
+	if len(inputPath) != 0 && upload {
 		bucketName := ctx.String("minio-bucket")
 		uploadCsv(dealCsvPath, fmt.Sprintf("%s/%s", aliasName, bucketName), ctx)
 	}

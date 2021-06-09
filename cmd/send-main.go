@@ -255,6 +255,7 @@ func proposeOfflineDeal(config *OfflineDeal) {
 		errorIf(errDummy(), err.Error())
 	} else {
 		config.DealCid = strings.TrimSuffix(string(stdout), "\n")
+		fmt.Println(fmt.Sprintf("DataCid: %s, DealCid: %s", config.DataCid, config.DealCid))
 	}
 }
 

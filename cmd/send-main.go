@@ -73,7 +73,11 @@ func mainSend(ctx *cli.Context) error {
 		pieceCid := strings.TrimSpace(ctx.String("piece-cid"))
 		pieceSize := strings.TrimSpace(ctx.String("piece-size"))
 		dataCid := strings.TrimSpace(ctx.String("data-cid"))
-		dealConfigs = []*OfflineDeal{{PieceCid: pieceCid, DataCid: dataCid, PieceSize: pieceSize}}
+		deal := NewOfflineDeal()
+		deal.PieceSize = pieceSize
+		deal.PieceCid = pieceCid
+		deal.DataCid = dataCid
+		dealConfigs = []*OfflineDeal{deal}
 	}
 
 	for _, dealConfig := range dealConfigs {

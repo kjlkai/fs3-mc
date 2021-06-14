@@ -33,6 +33,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/mattn/go-ieproxy"
 	"github.com/minio/cli"
@@ -461,4 +462,13 @@ func httpClient(timeout time.Duration) *http.Client {
 			DisableKeepAlives: true,
 		},
 	}
+}
+
+func isInt(s string) bool {
+	for _, c := range s {
+		if !unicode.IsDigit(c) {
+			return false
+		}
+	}
+	return true
 }

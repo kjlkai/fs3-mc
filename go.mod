@@ -7,6 +7,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.10.0
+	github.com/filedrive-team/go-graphsplit v0.4.0
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/json-iterator/go v1.1.11
 	github.com/klauspost/compress v1.12.2
@@ -14,7 +16,7 @@ require (
 	github.com/mattn/go-isatty v0.0.12
 	github.com/minio/cli v1.22.0
 	github.com/minio/colorjson v1.0.0
-	github.com/minio/filepath v1.0.0 // indirect
+	github.com/minio/filepath v1.0.0
 	github.com/minio/madmin-go v1.0.2
 	github.com/minio/minio v0.0.0-20210422165109-3455f786faf0
 	github.com/minio/minio-go/v7 v7.0.11-0.20210511181606-0263c8eee163
@@ -31,8 +33,14 @@ require (
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	golang.org/x/net v0.0.0-20210421230115-4e50805a0758
 	golang.org/x/text v0.3.6
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b
 	gopkg.in/h2non/filetype.v1 v1.0.5
 	gopkg.in/yaml.v2 v2.3.0
 	maze.io/x/duration v0.0.0-20160924141736-faac084b6075
+)
+
+replace (
+	github.com/filecoin-project/filecoin-ffi => ./extern/filecoin-ffi
+	google.golang.org/grpc => google.golang.org/grpc v1.29.1
 )

@@ -241,7 +241,7 @@ Upload the CAR file to MinIO, then you can share it to your miner
 
 ```mc cp /path/to/car_file play/mybucket```
 
-#### Send deal out
+#### Send deal
 `send` command can send an offline deal to a designated miner, a fully synchronized lotus node at local is required
 
 ```

@@ -35,6 +35,9 @@ version     manage bucket versioning
 replicate   configure server side bucket replication
 admin       manage MinIO servers
 update      update mc to latest release
+list        list swan info
+car         generate car file for filecoin offline deal
+send        send filecoin deal
 ```
 
 ## Docker Container

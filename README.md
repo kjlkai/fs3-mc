@@ -245,16 +245,20 @@ Upload the CAR file to MinIO, then you can share it to your miner
 `send` command can send an offline deal to a designated miner, a fully synchronized lotus node at local is required
 
 ```
---from: specify filecoin wallet to use, default $FIL_WALLET
 --piece-cid
 --piece-size
 --data-cid
---upload: specify whether upload the generated csv to MinIO or not, default: false
-In order to connect to your MinIO instance, you need to set environment variables of ACCESS_KEY, SECRET_KEY and ENDPOINT
---minio-bucket: specify the bucket name used in MinIO, if '--upload is set to true', default: swan
+--from: specify filecoin wallet to use, default: $FIL_WALLET
 --price: specify the deal price for each GiB of file, default: 0
 --start: specify days for miner to process the file, default: 7
 --duration: specify length in day to store the file, default: 365
+--upload: specify whether upload the generated csv to MinIO or not, default: false
+          In order to connect to your MinIO instance, you need to set environment variables of ACCESS_KEY, SECRET_KEY and ENDPOINT
+--minio-bucket: specify the bucket name used in MinIO, if '--upload is set to true', default: swan
+```
+
+```
+mc send --piece-cid baga6ea4seaqdmps47pxpgpclxo4xgqtkoxylwasf4mm524wldmguqgu45rce2pq --piece-size 2130706432 --data-cid QmcRx2dFaScfu61Vp13gZPk87zT4BL5PdG5n7Pnr93oPRc
 ```
 
 <a name="everyday-use"></a>

@@ -8,7 +8,7 @@ var carCmdSubcommands = []cli.Command{
 
 var carCmd = cli.Command{
 	Name:         "car",
-	Usage:        "list swan info",
+	Usage:        "generate car file for offline deal",
 	Action:       mainCar,
 	OnUsageError: onUsageError,
 	Before:       setGlobalsFromContext,

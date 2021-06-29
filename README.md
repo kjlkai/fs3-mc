@@ -1,7 +1,7 @@
-# MinIO Client Quickstart Guide
+# Fs3 Client Quickstart Guide
 [![Slack](https://slack.min.io/slack?type=svg)](https://slack.min.io) [![Go Report Card](https://goreportcard.com/badge/minio/mc)](https://goreportcard.com/report/minio/mc) [![Docker Pulls](https://img.shields.io/docker/pulls/minio/mc.svg?maxAge=604800)](https://hub.docker.com/r/minio/mc/) [![license](https://img.shields.io/badge/license-AGPL%20V3-blue)](https://github.com/minio/mc/blob/master/LICENSE)
 
-MinIO Client (mc) provides a modern alternative to UNIX commands like ls, cat, cp, mirror, diff, find etc. It supports filesystems and Amazon S3 compatible cloud storage service (AWS Signature v2 and v4).
+Fs3 Client (mc) provides a modern alternative to UNIX commands like ls, cat, cp, mirror, diff, find etc. It supports filesystems and Amazon S3 compatible cloud storage service (AWS Signature v2 and v4).
 
 ```
 alias       set, remove and list aliases in configuration file
@@ -35,6 +35,9 @@ version     manage bucket versioning
 replicate   configure server side bucket replication
 admin       manage MinIO servers
 update      update mc to latest release
+list        list swan info
+car         generate car file for filecoin offline deal
+send        send filecoin deal
 ```
 
 ## Docker Container
@@ -207,7 +210,59 @@ mc cp myobject.txt play/mybucket
 myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  100.00 % 41 B/s 0
 ```
 
+### Send a deal
+you may send an offline deal to a miner
+#### Prepare your environment
+ - A running lotus node at local
+ - A filecoin wallet with sufficient balance to send deal, set as environment variable $FIL_WALLET
+ - MinIO credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
 
+#### Generate CAR file
+`car generate` command generates car file
+```
+--car-dir: folder for splitted smaller pieces, in form of .car
+--slice-size: size for each pieces
+--parallel: number goroutines run when building ipld nodes
+--graph-name: it will use graph-name for prefix of smaller pieces
+--calc-commp: calculation of pieceCID, default value is false. Be careful, a lot of cpu, memory and time would be consumed if slice size is very large.
+--parent-path: usually just be the same as /path/to/dataset, it's just a method to figure out relative path when building IPLD graph
+```
+
+```
+mc car generate 
+--car-dir=path/to/car-dir \
+--slice-size=17179869184 \
+--parallel=2 \
+--graph-name=gs-test \
+--calc-commp=true \
+--parent-path=/path/to/dataset \
+/path/to/dataset
+```
+
+#### Upload CAR file
+Upload the CAR file to MinIO, then you can share it to your miner
+
+```mc cp /path/to/car_file play/mybucket```
+
+#### Send deal
+`send` command can send an offline deal to a designated miner, a fully synchronized lotus node at local is required
+
+```
+--piece-cid
+--piece-size
+--data-cid
+--from: specify filecoin wallet to use, default: $FIL_WALLET
+--price: specify the deal price for each GiB of file, default: 0
+--start: specify days for miner to process the file, default: 7
+--duration: specify length in day to store the file, default: 365
+--upload: specify whether upload the generated csv to MinIO or not, default: false
+          In order to connect to your MinIO instance, you need to set environment variables of ACCESS_KEY, SECRET_KEY and ENDPOINT
+--minio-bucket: specify the bucket name used in MinIO, if '--upload is set to true', default: swan
+```
+
+```
+mc send --piece-cid baga6ea4seaqdmps47pxpgpclxo4xgqtkoxylwasf4mm524wldmguqgu45rce2pq --piece-size 2130706432 --data-cid QmcRx2dFaScfu61Vp13gZPk87zT4BL5PdG5n7Pnr93oPRc
+```
 
 <a name="everyday-use"></a>
 ## Everyday Use

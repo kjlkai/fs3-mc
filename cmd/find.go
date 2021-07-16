@@ -30,7 +30,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	"github.com/minio/minio/pkg/console"
 
 	// golang does not support flat keys for path matching, find does

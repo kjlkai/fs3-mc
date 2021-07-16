@@ -1,7 +1,7 @@
-# Fs3 Client Quickstart Guide
-[![Slack](https://slack.min.io/slack?type=svg)](https://slack.min.io) [![Go Report Card](https://goreportcard.com/badge/minio/mc)](https://goreportcard.com/report/minio/mc) [![Docker Pulls](https://img.shields.io/docker/pulls/minio/mc.svg?maxAge=604800)](https://hub.docker.com/r/minio/mc/) [![license](https://img.shields.io/badge/license-AGPL%20V3-blue)](https://github.com/minio/mc/blob/master/LICENSE)
+# FS3 Client Quickstart Guide
+[![Slack](https://slack.min.io/slack?type=svg)](https://slack.min.io) [![Go Report Card](https://goreportcard.com/badge/minio/mc)](https://goreportcard.com/report/minio/mc) [![Docker Pulls](https://img.shields.io/docker/pulls/minio/mc.svg?maxAge=604800)](https://hub.docker.com/r/minio/mc/) [![license](https://img.shields.io/badge/license-AGPL%20V3-blue)](https://github.com/filswan/fs3-mc/blob/master/LICENSE)
 
-Fs3 Client (mc) provides a modern alternative to UNIX commands like ls, cat, cp, mirror, diff, find etc. It supports filesystems and Amazon S3 compatible cloud storage service (AWS Signature v2 and v4).
+FS3 Client (mc) provides a modern alternative to UNIX commands like ls, cat, cp, mirror, diff, find etc. It supports filesystems and Amazon S3 compatible cloud storage service (AWS Signature v2 and v4).
 
 ```
 alias       set, remove and list aliases in configuration file
@@ -43,13 +43,12 @@ send        send filecoin deal
 ## Install from Source
 Source installation is only intended for developers and advanced users. If you do not have a working Golang environment, please follow [How to install Golang](https://golang.org/doc/install). Minimum version required is [go1.13](https://golang.org/dl/#stable)
 
-Replace globally `github.com/minio/mc` with `github.com/filswan/fs3-mc`
 
 ```sh
 # get submodules
 git submodule update --init --recursive
 
-GO111MODULE=on go get github.com/minio/mc
+GO111MODULE=on go get github.com/filswan/fs3-mc
 
 make
 ```
@@ -160,7 +159,7 @@ you may send an online deal to a miner
 #### Import file stored in FS3
 Upload the CAR file to Filecoin, then you can share it to your miner
 
-```mc import /path/to/fs3_file```
+```mc import /path/to/FS3_file```
 
 #### Send online deal
 `sendonline` command can send an online deal to a designated miner, a fully synchronized lotus node at local is required

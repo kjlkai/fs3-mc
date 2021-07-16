@@ -34,7 +34,7 @@ import (
 	isatty "github.com/mattn/go-isatty"
 	"github.com/minio/cli"
 	json "github.com/minio/colorjson"
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	_ "github.com/minio/sha256-simd" // Needed for sha256 hash verifier.
 )
 
@@ -197,7 +197,7 @@ func IsSourceBuild() bool {
 //   mc (<OS>; <ARCH>[; dcos][; kubernetes][; docker][; source]) mc/<VERSION> mc/<RELEASE-TAG> mc/<COMMIT-ID>
 //
 // Any change here should be discussed by opening an issue at
-// https://github.com/minio/mc/issues.
+// https://github.com/filswan/fs3-mc/issues.
 func getUserAgent() string {
 
 	userAgentParts := []string{}

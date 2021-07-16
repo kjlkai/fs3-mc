@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/minio/mc/pkg/httptracer"
+	"github.com/filswan/fs3-mc/pkg/httptracer"
 	"github.com/minio/minio/pkg/console"
 )
 

@@ -42,7 +42,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/encrypt"
 	"maze.io/x/duration"
 
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	"github.com/minio/minio/pkg/console"
 )
 

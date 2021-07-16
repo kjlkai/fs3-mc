@@ -22,7 +22,7 @@ import (
 
 	"github.com/minio/cli"
 	"github.com/minio/madmin-go"
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	"github.com/minio/minio-go/v7/pkg/set"
 	"github.com/minio/minio/pkg/console"
 )

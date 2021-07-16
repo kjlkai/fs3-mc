@@ -46,6 +46,7 @@ Source installation is only intended for developers and advanced users. If you d
 Replace globally `github.com/minio/mc` with `github.com/filswan/fs3-mc`
 
 ```sh
+# get submodules
 git submodule update --init --recursive
 
 GO111MODULE=on go get github.com/minio/mc
@@ -149,7 +150,7 @@ myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓�
 ```
 
 ### Send a deal
-you may send an offline deal to a miner
+you may send an online deal to a miner
 #### Prepare your environment
  - A running lotus node at local
  - A filecoin wallet with sufficient balance to send deal, set as environment variable $FIL_WALLET

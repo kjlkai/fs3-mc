@@ -40,80 +40,14 @@ car         generate car file for filecoin offline deal
 send        send filecoin deal
 ```
 
-## Docker Container
-### Stable
-```
-docker pull minio/mc
-docker run minio/mc ls play
-```
-
-### Edge
-```
-docker pull minio/mc:edge
-docker run minio/mc:edge ls play
-```
-
-**Note:** Above examples run `mc` against MinIO [_play_ environment](#test-your-setup) by default. To run `mc` against other S3 compatible servers, start the container this way:
-
-```
-docker run -it --entrypoint=/bin/sh minio/mc
-```
-
-then use the [`mc config` command](#add-a-cloud-storage-service).
-
-### GitLab CI
-When using the Docker container in GitLab CI, you must [set the entrypoint to an empty string](https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#overriding-the-entrypoint-of-an-image).
-
-```
-deploy:
-  image:
-    name: minio/mc
-    entrypoint: ['']
-  stage: deploy
-  before_script:
-    - mc alias set minio $MINIO_HOST $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
-  script:
-    - mc cp <source> <destination>
-```
-
-## macOS
-### Homebrew
-Install mc packages using [Homebrew](http://brew.sh/)
-
-```
-brew install minio/stable/mc
-mc --help
-```
-
-## GNU/Linux
-### Binary Download
-| Platform | Architecture | URL |
-| ---------- | -------- |------|
-|GNU/Linux|64-bit Intel|https://dl.min.io/client/mc/release/linux-amd64/mc |
-||64-bit PPC|https://dl.min.io/client/mc/release/linux-ppc64le/mc |
-
-```
-wget https://dl.min.io/client/mc/release/linux-amd64/mc
-chmod +x mc
-./mc --help
-```
-
-## Microsoft Windows
-### Binary Download
-| Platform | Architecture | URL |
-| ---------- | -------- |------|
-|Microsoft Windows|64-bit Intel|https://dl.min.io/client/mc/release/windows-amd64/mc.exe |
-
-```
-mc.exe --help
-```
-
 ## Install from Source
 Source installation is only intended for developers and advanced users. If you do not have a working Golang environment, please follow [How to install Golang](https://golang.org/doc/install). Minimum version required is [go1.13](https://golang.org/dl/#stable)
 
 Replace globally `github.com/minio/mc` with `github.com/filswan/fs3-mc`
 
 ```sh
+git submodule update --init --recursive
+
 GO111MODULE=on go get github.com/minio/mc
 
 make

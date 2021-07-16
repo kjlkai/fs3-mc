@@ -156,51 +156,26 @@ you may send an online deal to a miner
  - A filecoin wallet with sufficient balance to send deal, set as environment variable $FIL_WALLET
  - MinIO credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
 
-#### Generate CAR file
-`car generate` command generates car file
-```
---car-dir: folder for splitted smaller pieces, in form of .car
---slice-size: size for each pieces
---parallel: number goroutines run when building ipld nodes
---graph-name: it will use graph-name for prefix of smaller pieces
---calc-commp: calculation of pieceCID, default value is false. Be careful, a lot of cpu, memory and time would be consumed if slice size is very large.
---parent-path: usually just be the same as /path/to/dataset, it's just a method to figure out relative path when building IPLD graph
-```
+#### Import file stored in FS3
+Upload the CAR file to Filecoin, then you can share it to your miner
+
+```mc import /path/to/fs3_file```
+
+#### Send online deal
+`sendonline` command can send an online deal to a designated miner, a fully synchronized lotus node at local is required
 
 ```
-mc car generate 
---car-dir=path/to/car-dir \
---slice-size=17179869184 \
---parallel=2 \
---graph-name=gs-test \
---calc-commp=true \
---parent-path=/path/to/dataset \
-/path/to/dataset
-```
-
-#### Upload CAR file
-Upload the CAR file to MinIO, then you can share it to your miner
-
-```mc cp /path/to/car_file play/mybucket```
-
-#### Send deal
-`send` command can send an offline deal to a designated miner, a fully synchronized lotus node at local is required
-
-```
---piece-cid
---piece-size
 --data-cid
+--mine-id
 --from: specify filecoin wallet to use, default: $FIL_WALLET
+--verified-deal: specify whether deal is verified, default: "false" ('true' if verified)
+--fast-retrieval: specify data retrieval type, defalult: 'true' ('false' if not using fast retrieval approach)   
 --price: specify the deal price for each GiB of file, default: 0
---start: specify days for miner to process the file, default: 7
 --duration: specify length in day to store the file, default: 365
---upload: specify whether upload the generated csv to MinIO or not, default: false
-          In order to connect to your MinIO instance, you need to set environment variables of ACCESS_KEY, SECRET_KEY and ENDPOINT
---minio-bucket: specify the bucket name used in MinIO, if '--upload is set to true', default: swan
 ```
 
 ```
-mc send --piece-cid baga6ea4seaqdmps47pxpgpclxo4xgqtkoxylwasf4mm524wldmguqgu45rce2pq --piece-size 2130706432 --data-cid QmcRx2dFaScfu61Vp13gZPk87zT4BL5PdG5n7Pnr93oPRc
+mc sendonline --from f3tektw5tqjnxbcdybn21dx9123tdrndvvcu5w7usx7m3exqsfkxezncpefsf6fmianjvwkc2qw --data-cid bafykbzacedcum7rj3z24wi2fexmvrw5aefllqsixl5ozbqtpexmds2snknbl2 --miner-id t03354
 ```
 
 <a name="everyday-use"></a>

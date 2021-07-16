@@ -167,7 +167,7 @@ Upload the CAR file to Filecoin, then you can share it to your miner
 
 ```
 --data-cid
---mine-id
+--miner-id
 --from: specify filecoin wallet to use, default: $FIL_WALLET
 --verified-deal: specify whether deal is verified, default: "false" ('true' if verified)
 --fast-retrieval: specify data retrieval type, defalult: 'true' ('false' if not using fast retrieval approach)   

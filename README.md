@@ -111,8 +111,12 @@ mc.exe --help
 ## Install from Source
 Source installation is only intended for developers and advanced users. If you do not have a working Golang environment, please follow [How to install Golang](https://golang.org/doc/install). Minimum version required is [go1.13](https://golang.org/dl/#stable)
 
+Replace globally `github.com/minio/mc` with `github.com/filswan/fs3-mc`
+
 ```sh
 GO111MODULE=on go get github.com/minio/mc
+
+make
 ```
 
 ## Add a Cloud Storage Service

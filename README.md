@@ -47,10 +47,8 @@ Source installation is only intended for developers and advanced users. If you d
 ```sh
 # get submodules
 git submodule update --init --recursive
-
+make ffi
 GO111MODULE=on go get github.com/filswan/fs3-mc
-
-make
 ```
 
 ## Add a Cloud Storage Service

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/minio/cli"
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	csv "github.com/minio/minio/pkg/csvparser"
 	"math/big"
 	"os"

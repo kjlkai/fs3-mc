@@ -31,7 +31,7 @@ docker: build
 
 vet:
 	@echo "Running $@"
-	@GO111MODULE=on go vet github.com/minio/mc/...
+	@GO111MODULE=on go vet github.com/filswan/fs3-mc/...
 
 fmt:
 	@echo "Running $@"

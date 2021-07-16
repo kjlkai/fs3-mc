@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	"github.com/minio/minio/pkg/console"
 	"github.com/minio/minio/pkg/quick"
 )

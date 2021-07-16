@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/minio/cli"
 	json "github.com/minio/colorjson"
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	"io"
 	"io/ioutil"
 	"net/http"

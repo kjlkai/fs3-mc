@@ -17,12 +17,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main // import "github.com/minio/mc"
+package main // import "github.com/filswan/fs3-mc"
 
 import (
 	"os"
 
-	mc "github.com/minio/mc/cmd"
+	mc "github.com/filswan/fs3-mc/cmd"
 )
 
 func main() {

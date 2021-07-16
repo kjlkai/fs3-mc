@@ -18,7 +18,7 @@
 package cmd
 
 import (
-	"github.com/minio/mc/pkg/probe"
+	"github.com/filswan/fs3-mc/pkg/probe"
 )
 
 // URLs contains source and target urls

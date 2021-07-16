@@ -16,6 +16,10 @@ checks:
 	@echo "Checking dependencies"
 	@(env bash $(PWD)/buildscripts/checkdeps.sh)
 
+ffi:
+	./extern/filecoin-ffi/install-filcrypto
+.PHONY: ffi
+
 getdeps:
 	@mkdir -p ${GOPATH}/bin
 	@which golangci-lint 1>/dev/null || (echo "Installing golangci-lint" && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.27.0)

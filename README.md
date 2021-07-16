@@ -204,13 +204,3 @@ admin    config   diff     find     ls       mirror   policy   session  sql     
 cat      cp       event    head     mb       pipe     rm       share    stat     version
 ```
 
-## Explore Further
-- [MinIO Client Complete Guide](https://docs.min.io/docs/minio-client-complete-guide)
-- [MinIO Quickstart Guide](https://docs.min.io/docs/minio-quickstart-guide)
-- [The MinIO documentation website](https://docs.min.io)
-
-## Contribute to MinIO Project
-Please follow MinIO [Contributor's Guide](https://github.com/minio/mc/blob/master/CONTRIBUTING.md)
-
-## License
-Use of `mc` is governed by the GNU AGPLv3 license that can be found in the [LICENSE](https://github.com/minio/mc/blob/master/LICENSE) file.

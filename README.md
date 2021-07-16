@@ -174,6 +174,8 @@ Upload the CAR file to Filecoin, then you can share it to your miner
 --duration: specify length in day to store the file, default: 365
 ```
 
+*Example:*    
+    
 ```
 mc sendonline --from f3tektw5tqjnxbcdybn21dx9123tdrndvvcu5w7usx7m3exqsfkxezncpefsf6fmianjvwkc2qw --data-cid bafykbzacedcum7rj3z24wi2fexmvrw5aefllqsixl5ozbqtpexmds2snknbl2 --miner-id t03354
 ```

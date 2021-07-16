@@ -40,79 +40,18 @@ car         generate car file for filecoin offline deal
 send        send filecoin deal
 ```
 
-## Docker Container
-### Stable
-```
-docker pull minio/mc
-docker run minio/mc ls play
-```
-
-### Edge
-```
-docker pull minio/mc:edge
-docker run minio/mc:edge ls play
-```
-
-**Note:** Above examples run `mc` against MinIO [_play_ environment](#test-your-setup) by default. To run `mc` against other S3 compatible servers, start the container this way:
-
-```
-docker run -it --entrypoint=/bin/sh minio/mc
-```
-
-then use the [`mc config` command](#add-a-cloud-storage-service).
-
-### GitLab CI
-When using the Docker container in GitLab CI, you must [set the entrypoint to an empty string](https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#overriding-the-entrypoint-of-an-image).
-
-```
-deploy:
-  image:
-    name: minio/mc
-    entrypoint: ['']
-  stage: deploy
-  before_script:
-    - mc alias set minio $MINIO_HOST $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
-  script:
-    - mc cp <source> <destination>
-```
-
-## macOS
-### Homebrew
-Install mc packages using [Homebrew](http://brew.sh/)
-
-```
-brew install minio/stable/mc
-mc --help
-```
-
-## GNU/Linux
-### Binary Download
-| Platform | Architecture | URL |
-| ---------- | -------- |------|
-|GNU/Linux|64-bit Intel|https://dl.min.io/client/mc/release/linux-amd64/mc |
-||64-bit PPC|https://dl.min.io/client/mc/release/linux-ppc64le/mc |
-
-```
-wget https://dl.min.io/client/mc/release/linux-amd64/mc
-chmod +x mc
-./mc --help
-```
-
-## Microsoft Windows
-### Binary Download
-| Platform | Architecture | URL |
-| ---------- | -------- |------|
-|Microsoft Windows|64-bit Intel|https://dl.min.io/client/mc/release/windows-amd64/mc.exe |
-
-```
-mc.exe --help
-```
-
 ## Install from Source
 Source installation is only intended for developers and advanced users. If you do not have a working Golang environment, please follow [How to install Golang](https://golang.org/doc/install). Minimum version required is [go1.13](https://golang.org/dl/#stable)
 
+Replace globally `github.com/minio/mc` with `github.com/filswan/fs3-mc`
+
 ```sh
+# get submodules
+git submodule update --init --recursive
+
 GO111MODULE=on go get github.com/minio/mc
+
+make
 ```
 
 ## Add a Cloud Storage Service
@@ -210,58 +149,36 @@ mc cp myobject.txt play/mybucket
 myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  100.00 % 41 B/s 0
 ```
 
+## How to use    
 ### Send a deal
-you may send an offline deal to a miner
+you may send an online deal to a miner
 #### Prepare your environment
  - A running lotus node at local
  - A filecoin wallet with sufficient balance to send deal, set as environment variable $FIL_WALLET
  - MinIO credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
 
-#### Generate CAR file
-`car generate` command generates car file
-```
---car-dir: folder for splitted smaller pieces, in form of .car
---slice-size: size for each pieces
---parallel: number goroutines run when building ipld nodes
---graph-name: it will use graph-name for prefix of smaller pieces
---calc-commp: calculation of pieceCID, default value is false. Be careful, a lot of cpu, memory and time would be consumed if slice size is very large.
---parent-path: usually just be the same as /path/to/dataset, it's just a method to figure out relative path when building IPLD graph
-```
+#### Import file stored in FS3
+Upload the CAR file to Filecoin, then you can share it to your miner
+
+```mc import /path/to/fs3_file```
+
+#### Send online deal
+`sendonline` command can send an online deal to a designated miner, a fully synchronized lotus node at local is required
 
 ```
-mc car generate 
---car-dir=path/to/car-dir \
---slice-size=17179869184 \
---parallel=2 \
---graph-name=gs-test \
---calc-commp=true \
---parent-path=/path/to/dataset \
-/path/to/dataset
-```
-
-#### Upload CAR file
-Upload the CAR file to MinIO, then you can share it to your miner
-
-```mc cp /path/to/car_file play/mybucket```
-
-#### Send deal
-`send` command can send an offline deal to a designated miner, a fully synchronized lotus node at local is required
-
-```
---piece-cid
---piece-size
 --data-cid
+--miner-id
 --from: specify filecoin wallet to use, default: $FIL_WALLET
+--verified-deal: specify whether deal is verified, default: "false" ('true' if verified)
+--fast-retrieval: specify data retrieval type, defalult: 'true' ('false' if not using fast retrieval approach)   
 --price: specify the deal price for each GiB of file, default: 0
---start: specify days for miner to process the file, default: 7
 --duration: specify length in day to store the file, default: 365
---upload: specify whether upload the generated csv to MinIO or not, default: false
-          In order to connect to your MinIO instance, you need to set environment variables of ACCESS_KEY, SECRET_KEY and ENDPOINT
---minio-bucket: specify the bucket name used in MinIO, if '--upload is set to true', default: swan
 ```
 
+*Example:*    
+    
 ```
-mc send --piece-cid baga6ea4seaqdmps47pxpgpclxo4xgqtkoxylwasf4mm524wldmguqgu45rce2pq --piece-size 2130706432 --data-cid QmcRx2dFaScfu61Vp13gZPk87zT4BL5PdG5n7Pnr93oPRc
+mc sendonline --from f3tektw5tqjnxbcdybn21dx9123tdrndvvcu5w7usx7m3exqsfkxezncpefsf6fmianjvwkc2qw --data-cid bafykbzacedcum7rj3z24wi2fexmvrw5aefllqsixl5ozbqtpexmds2snknbl2 --miner-id t03354
 ```
 
 <a name="everyday-use"></a>
@@ -288,13 +205,3 @@ admin    config   diff     find     ls       mirror   policy   session  sql     
 cat      cp       event    head     mb       pipe     rm       share    stat     version
 ```
 
-## Explore Further
-- [MinIO Client Complete Guide](https://docs.min.io/docs/minio-client-complete-guide)
-- [MinIO Quickstart Guide](https://docs.min.io/docs/minio-quickstart-guide)
-- [The MinIO documentation website](https://docs.min.io)
-
-## Contribute to MinIO Project
-Please follow MinIO [Contributor's Guide](https://github.com/minio/mc/blob/master/CONTRIBUTING.md)
-
-## License
-Use of `mc` is governed by the GNU AGPLv3 license that can be found in the [LICENSE](https://github.com/minio/mc/blob/master/LICENSE) file.

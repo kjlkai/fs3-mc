@@ -308,7 +308,8 @@ func checkSendOnlineArgs(ctx *cli.Context) (string, string, string, string, stri
 	wallet := strings.TrimSpace(ctx.String("from"))
 	if len(wallet) < 1 {
 		wallet = os.Getenv("FIL_WALLET")
-	} else {
+	}
+	if len(wallet) < 1 {
 		fatalIf(errInvalidArgument().Trace(wallet), "please provide a valid wallet")
 		return "", "", "", "", "", "", ""
 	}

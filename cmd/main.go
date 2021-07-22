@@ -33,8 +33,8 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb"
-	"github.com/minio/cli"
 	"github.com/filswan/fs3-mc/pkg/probe"
+	"github.com/minio/cli"
 	"github.com/minio/minio/pkg/console"
 	"github.com/minio/minio/pkg/trie"
 	"github.com/minio/minio/pkg/words"
@@ -438,6 +438,8 @@ var appCmds = []cli.Command{
 	listCmd,
 	carCmd,
 	sendCmd,
+	sendOnlineCmd,
+	importCmd,
 }
 
 func registerApp(name string) *cli.App {

@@ -158,15 +158,19 @@ you may send an online deal to a miner
 #### Import file stored in FS3
 Import the file stored in FS3 to Filecoin, then you can share it to your miner
 
-```mc import --buckt [bucket] --object [object]```
+```bash
+mc import --buckt [bucket] --object [object]
+```
 
 For example:
-```mc import --buckt test --object test.zip```
+```bash
+mc import --bucket test --object test.zip
+```
 
 Note:
 The `defaultVolumeAddress` where fs3 store the uploaded data is `~/.minio`. It can be changed in file `fs3-mc/cmd/Config-v10.go`
 
-A message that contains `Bucket`,`Object` and `datacid` will be returned if successful.
+A message that contains `Bucket`,`Object` and `Datacid` will be returned if successful.
 
 #### Send online deal
 `sendonline` command can send an online deal to a designated miner, a fully synchronized lotus node at local is required
@@ -183,7 +187,7 @@ A message that contains `Bucket`,`Object` and `datacid` will be returned if succ
 
 *Example:*    
     
-```
+```bash
 mc sendonline --from nusx7m3exqsfkxezncpefsf6fmian --verified-deal false --fast-retrieval true --data-cid m7xmefllqsixl5 --miner-id t00001 --price 0.00005 --duration 1036800
 ```
 

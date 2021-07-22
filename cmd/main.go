@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/filswan/fs3-mc/logs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -78,6 +79,8 @@ VERSION:
 
 // Main starts mc application
 func Main(args []string) {
+
+	logs.InitLogger()
 
 	if len(args) > 1 {
 		switch args[1] {

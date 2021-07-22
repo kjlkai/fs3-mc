@@ -153,7 +153,7 @@ myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓�
 A wallet address is a must for sending deals to miner. You can change it via setting environment variable `FIL_WALLET`.
 ``` bash 
 # export wallet address
-export FIL_WALLET=MY_WALLET_ADDRESS 
+export FIL_WALLET=<MY_WALLET_ADDRESS> 
 ```
 
 ### Send a deal

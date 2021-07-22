@@ -306,12 +306,17 @@ func checkSendOnlineArgs(ctx *cli.Context) (string, string, string, string, stri
 		}
 	}
 	if len(args) < 1 {
-
+		fatalIf(errInvalidArgument().Trace(args...), "please provide a valid argument")
+		return "", "", "", "", "", "", ""
 	}
 	wallet := strings.TrimSpace(ctx.String("from"))
 	if len(wallet) < 1 {
 		wallet = os.Getenv("FIL_WALLET")
+	} else {
+		fatalIf(errInvalidArgument().Trace(wallet), "please provide a valid wallet")
+		return "", "", "", "", "", "", ""
 	}
+
 	verifiedDeal := strings.TrimSpace(ctx.String("verified-deal"))
 	fastRetrieval := strings.TrimSpace(ctx.String("fast-retrieval"))
 	datacid := ctx.String("data-cid")
@@ -319,14 +324,13 @@ func checkSendOnlineArgs(ctx *cli.Context) (string, string, string, string, stri
 	duration := ctx.String("duration")
 	price := ctx.String("price")
 
-	if len(wallet) == 0 {
-		fatalIf(errInvalidArgument().Trace(wallet), "please provide a valid wallet")
-	}
 	if len(duration) == 0 {
 		fatalIf(errInvalidArgument(), "please provide a valid length of duration in day")
+		return "", "", "", "", "", "", ""
 	}
 	if len(price) == 0 {
 		fatalIf(errInvalidArgument(), "please provide a valid price")
+		return "", "", "", "", "", "", ""
 	}
 
 	return wallet, verifiedDeal, fastRetrieval, datacid, miner, duration, price

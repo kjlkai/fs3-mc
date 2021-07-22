@@ -141,6 +141,8 @@ Bucket created successfully `play/mybucket`.
 Copy Objects
 `cp` command copies data from one or more sources to a target.
 
+Note
+
 *Example:*
 ```
 ./mc cp myobject.txt play/mybucket
@@ -149,19 +151,63 @@ myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓�
 
 ## How to use    
 
+#### Prepare your environment
+ - A running lotus node at local
+ - A filecoin wallet with sufficient balance to send deal, set as environment variable $FIL_WALLET
+ - FS3 Server credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
+
+### Upload files to FS3 server
+#### Export environment variables
+Environment variables `ENDPOINT`, `ACCESS_KEY`, `SECRET_KEY` need to be set for FS3 Server authorization and usage.
+``` bash 
+# export FS3 Serve Endpoint
+export ENDPOINT=<FS3_SERER_ENDPOINT>
+
+# export FS3 Server Access Key
+export ACCESS_KEY=<FS3_SERVER_ACCESS_KEY>
+
+# export FS3 Server SECRET Key
+export SECRET_KEY=<FS3_SERVER_SECRET_KEY>
+```
+
+Example: 
+``` bash 
+# export FS3 Serve Endpoint
+export ENDPOINT=http://FS3_SERVER_URL:PORT
+
+# export FS3 Server Access Key
+export ACCESS_KEY=minioadmin
+
+# export FS3 Server SECRET Key
+export SECRET_KEY=minioadmin
+```
+
+#### Upload local files to FS3 Server
+
+Note: The FS3 server must be running when doing the uploading process. Make sure it is runing before uploading files.
+
+You can simply upload a local file to the designated bucket of FS3 Server using `mc` with `cp`
+``` bash 
+./mc cp PATH/TO/LOCAL/FILE minio/BUCKET
+```
+
+Example:
+``` bash 
+# Upload test.txt to bucket 'test_bucket'
+./mc cp /tmp/test/test.txt minio/test_bucket
+```
+
+### Send online deals
+you may send an online deal to a miner
+
 #### Export environment variables
 A wallet address is a must for sending deals to miner. You can change it via setting environment variable `FIL_WALLET`. Or you can set it up as an augment passing to `mc` when sending deals.
 ``` bash 
 # export wallet address
-export FIL_WALLET=<MY_WALLET_ADDRESS> 
+export FIL_WALLET=<MY_FIL_WALLET>
 ```
 
-### Send a deal
-you may send an online deal to a miner
-#### Prepare your environment
- - A running lotus node at local
- - A filecoin wallet with sufficient balance to send deal, set as environment variable $FIL_WALLET
- - MinIO credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
+
 
 #### Import file stored in FS3
 Import the file stored in FS3 to Filecoin, then you can share it to your miner
@@ -180,7 +226,7 @@ The `defaultVolumeAddress` where fs3 store the uploaded data is `~/.minio`. It c
 
 A message that contains `Bucket`,`Object` and `Datacid` will be returned if successful.
 
-#### Send online deal
+#### Send online deal to miner
 `sendonline` command can send an online deal to a designated miner, a fully synchronized lotus node at local is required
 
 ```

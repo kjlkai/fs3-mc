@@ -167,7 +167,7 @@ you may send an online deal to a miner
 Import the file stored in FS3 to Filecoin, then you can share it to your miner
 
 ```bash
-mc import --buckt [bucket] --object [object]
+mc import --bucket [bucket] --object [object]
 ```
 
 For example:

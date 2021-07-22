@@ -305,10 +305,6 @@ func checkSendOnlineArgs(ctx *cli.Context) (string, string, string, string, stri
 			fatalIf(errInvalidArgument().Trace(args...), "Unable to validate empty argument.")
 		}
 	}
-	if len(args) < 1 {
-		fatalIf(errInvalidArgument().Trace(args...), "please provide a valid argument")
-		return "", "", "", "", "", "", ""
-	}
 	wallet := strings.TrimSpace(ctx.String("from"))
 	if len(wallet) < 1 {
 		wallet = os.Getenv("FIL_WALLET")

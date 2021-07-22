@@ -148,6 +148,14 @@ myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓�
 ```
 
 ## How to use    
+
+#### Export environment variables
+A wallet address is a must for sending deals to miner. You can change it via setting environment variable `FIL_WALLET`.
+``` bash 
+# export wallet address
+export FIL_WALLET=MY_WALLET_ADDRESS 
+```
+
 ### Send a deal
 you may send an online deal to a miner
 #### Prepare your environment
@@ -164,7 +172,7 @@ mc import --buckt [bucket] --object [object]
 
 For example:
 ```bash
-mc import --bucket test --object test.zip
+mc import --bucket testBucket --object test.zip
 ```
 
 Note:

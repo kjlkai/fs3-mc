@@ -49,6 +49,7 @@ Source installation is only intended for developers and advanced users. If you d
 git submodule update --init --recursive
 make ffi
 GO111MODULE=on go get github.com/filswan/fs3-mc
+go build -o ./build/mc
 ```
 
 ## Add a Cloud Storage Service
@@ -155,29 +156,38 @@ you may send an online deal to a miner
  - MinIO credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
 
 #### Import file stored in FS3
-Upload the CAR file to Filecoin, then you can share it to your miner
+Import the file stored in FS3 to Filecoin, then you can share it to your miner
 
-```mc import /path/to/FS3_file```
+```mc import --buckt [bucket] --object [object]```
+
+For example:
+```mc import --buckt test --object test.zip```
+
+Note:
+The `defaultVolumeAddress` where fs3 store the uploaded data is `~/.minio`. It can be changed in file `fs3-mc/cmd/Config-v10.go`
+
+A message that contains `Bucket`,`Object` and `datacid` will be returned if successful.
 
 #### Send online deal
 `sendonline` command can send an online deal to a designated miner, a fully synchronized lotus node at local is required
 
 ```
---data-cid
---miner-id
---from: specify filecoin wallet to use, default: $FIL_WALLET
+--from: (optional) specify filecoin wallet to use, default: $FIL_WALLET
 --verified-deal: specify whether deal is verified, default: "false" ('true' if verified)
 --fast-retrieval: specify data retrieval type, defalult: 'true' ('false' if not using fast retrieval approach)   
+--data-cid: specify the valid data-cid for sending deal
+--miner-id: specify which miner to send deal to
 --price: specify the deal price for each GiB of file, default: 0
---duration: specify length in day to store the file, default: 365
+--duration: specify length in day to store the file, default: 1036800
 ```
 
 *Example:*    
     
 ```
-mc sendonline --from f3tektw5tqjnxbcdybn21dx9123tdrndvvcu5w7usx7m3exqsfkxezncpefsf6fmianjvwkc2qw --data-cid bafykbzacedcum7rj3z24wi2fexmvrw5aefllqsixl5ozbqtpexmds2snknbl2 --miner-id t03354
+mc sendonline --from nusx7m3exqsfkxezncpefsf6fmian --verified-deal false --fast-retrieval true --data-cid m7xmefllqsixl5 --miner-id t00001 --price 0.00005 --duration 1036800
 ```
 
+A message that contains all the deal information and `Dealcid` will be returned if successful.
 <a name="everyday-use"></a>
 ## Everyday Use
 

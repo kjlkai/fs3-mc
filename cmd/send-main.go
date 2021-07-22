@@ -20,15 +20,15 @@ import (
 )
 
 var (
-	defaultStart    = 7
-	defaultDuration = 365
-	epochPerHour    = 120
-	GiBToByte       = 1024 * 1024 * 1024
-	aliasName       = "swanminio"
+	defaultStart          = 7
+	defaultDuration       = 360
+	epochPerHour          = 120
+	GiBToByte             = 1024 * 1024 * 1024
+	aliasName             = "swanminio"
 	defaultOnlineDuration = "1036800"
-	defaultVerifiedDeal = "false"
-	defaultFastRetrieval = "true"
-	defaultOnlinePrice = "0"
+	defaultVerifiedDeal   = "false"
+	defaultFastRetrieval  = "true"
+	defaultOnlinePrice    = "0"
 )
 
 type OfflineDeal struct {
@@ -60,7 +60,7 @@ func NewOfflineDeal() *OfflineDeal {
 }
 
 //func NewOnlineDeal() *OnlineDeal {
-	//return &OnlineDeal{FastRetrieval: "true"}
+//return &OnlineDeal{FastRetrieval: "true"}
 //}
 
 var sendCmd = cli.Command{
@@ -84,16 +84,16 @@ var sendOnlineCmd = cli.Command{
 }
 
 func mainSendOnline(ctx *cli.Context) error {
-	wallet, verifiedDeal,fastRetrieval, datacid, miner, duration, price := checkSendOnlineArgs(ctx)
+	wallet, verifiedDeal, fastRetrieval, datacid, miner, duration, price := checkSendOnlineArgs(ctx)
 
 	onlineDealConfigs := OnlineDeal{
-		SenderWallet: wallet,
-		VerifiedDeal: verifiedDeal,
+		SenderWallet:  wallet,
+		VerifiedDeal:  verifiedDeal,
 		FastRetrieval: fastRetrieval,
-		DataCid: datacid,
-		MinerId: miner,
-		Cost: price,
-		Duration: duration,
+		DataCid:       datacid,
+		MinerId:       miner,
+		Cost:          price,
+		Duration:      duration,
 	}
 	proposeOnlineDeal(onlineDealConfigs)
 
@@ -196,17 +196,17 @@ var sendOnlineFlags = []cli.Flag{
 	cli.StringFlag{
 		Name:   "from",
 		EnvVar: "FIL_WALLET",
-		Usage:  "specify filecoin wallet to use, default $FIL_WALLET",
+		Usage:  "specify filecoin wallet to use, default ",
 	},
 	cli.StringFlag{
 		Name:  "verified-deal",
 		Value: defaultVerifiedDeal,
-		Usage: "specify whether deal is verified, default: false",
+		Usage: "specify whether deal is verified",
 	},
 	cli.StringFlag{
 		Name:  "fast-retrieval",
 		Value: defaultFastRetrieval,
-		Usage: "specify whether using fast retrieval, default: true",
+		Usage: "specify whether using fast retrieval",
 	},
 	cli.StringFlag{
 		Name:  "data-cid",
@@ -219,12 +219,12 @@ var sendOnlineFlags = []cli.Flag{
 	cli.StringFlag{
 		Name:  "price",
 		Value: defaultOnlinePrice,
-		Usage: "specify the deal price for each GiB of file, default: 0",
+		Usage: "specify the deal price for each GiB of file",
 	},
 	cli.StringFlag{
 		Name:  "duration",
 		Value: defaultOnlineDuration,
-		Usage: "specify length in day to store the file, default: 365",
+		Usage: "specify length in day to store the file",
 	},
 }
 
@@ -298,7 +298,7 @@ func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.F
 	return wallet, start, duration, miner, input, priceDecimal
 }
 
-func checkSendOnlineArgs(ctx *cli.Context) (string, string,string, string, string,string, string) {
+func checkSendOnlineArgs(ctx *cli.Context) (string, string, string, string, string, string, string) {
 	args := ctx.Args()
 	for _, arg := range args {
 		if strings.TrimSpace(arg) == "" {
@@ -309,6 +309,9 @@ func checkSendOnlineArgs(ctx *cli.Context) (string, string,string, string, strin
 
 	}
 	wallet := strings.TrimSpace(ctx.String("from"))
+	if len(wallet) < 1 {
+		wallet = os.Getenv("FIL_WALLET")
+	}
 	verifiedDeal := strings.TrimSpace(ctx.String("verified-deal"))
 	fastRetrieval := strings.TrimSpace(ctx.String("fast-retrieval"))
 	datacid := ctx.String("data-cid")
@@ -322,13 +325,12 @@ func checkSendOnlineArgs(ctx *cli.Context) (string, string,string, string, strin
 	if len(duration) == 0 {
 		fatalIf(errInvalidArgument(), "please provide a valid length of duration in day")
 	}
-	if len(price) ==0 {
+	if len(price) == 0 {
 		fatalIf(errInvalidArgument(), "please provide a valid price")
 	}
 
-	return wallet,verifiedDeal, fastRetrieval,datacid, miner,duration, price
+	return wallet, verifiedDeal, fastRetrieval, datacid, miner, duration, price
 }
-
 
 func getCurrentEpoch() uint {
 	sec := time.Now().Unix()
@@ -378,22 +380,20 @@ func proposeOnlineDeal(config OnlineDeal) {
 
 	//var commandArgs []string
 	//commandArgs = []string{"client", "deal", "--from", config.SenderWallet, "--verified-deal=", config.VerifiedDeal,
-		//"--fast-retrieval=", config.FastRetrieval, config.DataCid,
-		//config.MinerId, config.Cost, config.Duration}
+	//"--fast-retrieval=", config.FastRetrieval, config.DataCid,
+	//config.MinerId, config.Cost, config.Duration}
 	//dealCID, err := exec.Command("lotus",commandArgs...).Output()
 
-	commandLine := "lotus " + "deal " + "--from " + config.SenderWallet + " --verified-deal="+config.VerifiedDeal+
-		" --fast-retrieval="+config.FastRetrieval+" "+config.DataCid+" "+config.MinerId+" "+config.Cost+" "+config.Duration
+	commandLine := "lotus " + "client " + "deal " + "--from " + config.SenderWallet + " --verified-deal=" + config.VerifiedDeal +
+		" --fast-retrieval=" + config.FastRetrieval + " " + config.DataCid + " " + config.MinerId + " " + config.Cost + " " + config.Duration
 	dealCID, err := ExecCommand(commandLine)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
 	} else {
-		fmt.Println(fmt.Sprintf("DataCid: %s, DealCid: %s", config.DataCid, strings.TrimSuffix(string(dealCID),"\n")))
+		fmt.Println(fmt.Sprintf("Wallet: %s, VerifiedDeal: %s, FastRetrieval: %s, DataCid: %s,MinerID: %s, Price: %s, Duration %s, DealCid: %s", config.SenderWallet, config.VerifiedDeal, config.FastRetrieval, config.DataCid, config.MinerId, config.Cost, config.Duration, strings.TrimSuffix(string(dealCID), "\n")))
 	}
 }
-
-
 
 func readCsv(filepath string) []*OfflineDeal {
 	csvFile, err := os.Open(filepath)

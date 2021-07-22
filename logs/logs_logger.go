@@ -21,11 +21,11 @@ func InitLogger() {
 	Log.SetReportCaller(true)
 	Log.SetFormatter(formatter)
 	pathMap := lfshook.PathMap{
-		log.InfoLevel:  "./logs/ledger_info.log",
-		log.WarnLevel:  "./logs/ledger_warn.log",
-		log.ErrorLevel: "./logs/ledger_error.log",
-		log.FatalLevel: "./logs/ledger_error.log",
-		log.PanicLevel: "./logs/ledger_error.log",
+		log.InfoLevel:  "./logs/fs3_mc_info.log",
+		log.WarnLevel:  "./logs/fs3_mc_warn.log",
+		log.ErrorLevel: "./logs/fs3_mc_error.log",
+		log.FatalLevel: "./logs/fs3_mc_error.log",
+		log.PanicLevel: "./logs/fs3_mc_error.log",
 	}
 	Log.Hooks.Add(lfshook.NewHook(
 		pathMap,

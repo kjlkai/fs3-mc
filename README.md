@@ -58,7 +58,7 @@ If you are planning to use `mc` only on POSIX compatible filesystems, you may sk
 To add one or more Amazon S3 compatible hosts, please follow the instructions below. `mc` stores all its configuration information in ``~/.mc/config.json`` file.
 
 ```
-mc alias set <ALIAS> <YOUR-S3-ENDPOINT> <YOUR-ACCESS-KEY> <YOUR-SECRET-KEY> --api <API-SIGNATURE> --path <BUCKET-LOOKUP-TYPE>
+./mc alias set <ALIAS> <YOUR-S3-ENDPOINT> <YOUR-ACCESS-KEY> <YOUR-SECRET-KEY> --api <API-SIGNATURE> --path <BUCKET-LOOKUP-TYPE>
 ```
 
 <ALIAS> is simply a short name to your cloud storage service. S3 end-point, access and secret keys are supplied by your cloud storage provider. API signature is an optional argument. By default, it is set to "S3v4".
@@ -69,14 +69,14 @@ Path is an optional argument. It is used to indicate whether dns or path style u
 MinIO server displays URL, access and secret keys.
 
 ```
-mc alias set minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
+./mc alias set minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
 ```
 
 ### Example - Amazon S3 Cloud Storage
 Get your AccessKeyID and SecretAccessKey by following [AWS Credentials Guide](http://docs.aws.amazon.com/general/latest/gr/aws-security-credentials.html).
 
 ```
-mc alias set s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
+./mc alias set s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
 ```
 
 **Note**: As an IAM user on Amazon S3 you need to make sure the user has full access to the buckets or set the following restricted policy for your IAM user
@@ -110,7 +110,7 @@ mc alias set s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJ
 Get your AccessKeyID and SecretAccessKey by following [Google Credentials Guide](https://cloud.google.com/storage/docs/migrating?hl=en#keys)
 
 ```
-mc alias set gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
+./mc alias set gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
 ```
 
 ## Test Your Setup
@@ -134,7 +134,7 @@ Make a bucket
 
 *Example:*
 ```
-mc mb play/mybucket
+./mc mb play/mybucket
 Bucket created successfully `play/mybucket`.
 ```
 
@@ -143,14 +143,14 @@ Copy Objects
 
 *Example:*
 ```
-mc cp myobject.txt play/mybucket
+./mc cp myobject.txt play/mybucket
 myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  100.00 % 41 B/s 0
 ```
 
 ## How to use    
 
 #### Export environment variables
-A wallet address is a must for sending deals to miner. You can change it via setting environment variable `FIL_WALLET`.
+A wallet address is a must for sending deals to miner. You can change it via setting environment variable `FIL_WALLET`. Or you can set it up as an augment passing to `mc` when sending deals.
 ``` bash 
 # export wallet address
 export FIL_WALLET=<MY_WALLET_ADDRESS> 
@@ -167,12 +167,12 @@ you may send an online deal to a miner
 Import the file stored in FS3 to Filecoin, then you can share it to your miner
 
 ```bash
-mc import --bucket [bucket] --object [object]
+./mc import --bucket [bucket] --object [object]
 ```
 
 For example:
 ```bash
-mc import --bucket testBucket --object test.zip
+./mc import --bucket testBucket --object test.zip
 ```
 
 Note:
@@ -196,7 +196,7 @@ A message that contains `Bucket`,`Object` and `Datacid` will be returned if succ
 *Example:*    
     
 ```bash
-mc sendonline --from nusx7m3exqsfkxezncpefsf6fmian --verified-deal false --fast-retrieval true --data-cid m7xmefllqsixl5 --miner-id t00001 --price 0.00005 --duration 1036800
+./mc sendonline --from nusx7m3exqsfkxezncpefsf6fmian --verified-deal false --fast-retrieval true --data-cid m7xmefllqsixl5 --miner-id t00001 --price 0.00005 --duration 1036800
 ```
 
 A message that contains all the deal information and `Dealcid` will be returned if successful.

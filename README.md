@@ -222,7 +222,7 @@ For example:
 ```
 
 Note:
-The `defaultVolumeAddress` where fs3 store the uploaded data is `~/.minio`. It can be changed in file `fs3-mc/cmd/Config-v10.go`
+The `defaultVolumeAddress` where fs3 store the uploaded data is `~/minio-data`. It can be changed in file `fs3-mc/cmd/Config-v10.go`
 
 A message that contains `Bucket`,`Object` and `Datacid` will be returned if successful.
 

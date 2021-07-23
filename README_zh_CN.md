@@ -83,7 +83,10 @@ mc.exe --help
 ```
 go get -d github.com/filswan/fs3-mc
 cd ${GOPATH}/src/github.com/filswan/fs3-mc
-make
+git submodule update --init --recursive
+make ffi
+GO111MODULE=on go get github.com/filswan/fs3-mc
+go build -o ./build/mc
 ```
 
 ## 添加一个云存储服务

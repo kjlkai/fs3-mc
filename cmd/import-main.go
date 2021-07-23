@@ -9,15 +9,13 @@ import (
 	"strings"
 )
 
-
-
 type ImportOnlineDealData struct {
-	Bucket  string
-	Object  string
+	Bucket string
+	Object string
 }
 
 //func NewOnlineDealData() *ImportOnlineDealData {
-	//return &ImportOnlineDealData{}
+//return &ImportOnlineDealData{}
 //}
 
 var importCmd = cli.Command{
@@ -35,7 +33,7 @@ func mainImport(ctx *cli.Context) error {
 
 	importConfigs := ImportOnlineDealData{
 		Bucket: bucket,
-		Object : object ,
+		Object: object,
 	}
 	proposeImportData(importConfigs)
 
@@ -44,12 +42,12 @@ func mainImport(ctx *cli.Context) error {
 
 var importFlags = []cli.Flag{
 	cli.StringFlag{
-		Name:   "bucket",
-		Usage:  "specify which bucket to import",
+		Name:  "bucket",
+		Usage: "specify which bucket to import",
 	},
 	cli.StringFlag{
-		Name:   "object",
-		Usage:  "specify which object to import",
+		Name:  "object",
+		Usage: "specify which object to import",
 	},
 }
 
@@ -58,30 +56,26 @@ func checkImportArgs(ctx *cli.Context) (string, string) {
 	for _, arg := range args {
 		if strings.TrimSpace(arg) == "" {
 			fatalIf(errInvalidArgument().Trace(args...), "Unable to validate empty argument.")
+			return "", ""
 		}
 	}
-	if len(args) < 1 {
-
-	}
-
 	bucket := strings.TrimSpace(ctx.String("bucket"))
 	object := strings.TrimSpace(ctx.String("object"))
 	if len(bucket) == 0 {
 		fatalIf(errInvalidArgument(), "please provide a valid bucket name")
+		return "", ""
 	}
 	if len(object) == 0 {
 		fatalIf(errInvalidArgument(), "please provide a valid objective name")
+		return "", ""
 	}
 
-	return bucket,object
+	return bucket, object
 }
 
 func proposeImportData(config ImportOnlineDealData) {
-
-	//var commandArgs []string
-	//fs3VolumeAddress := "~/minio-data"
 	fs3VolumeAddress := defaultVolumeAddress
-	objectPath := filepath.Join(fs3VolumeAddress,config.Bucket, config.Object)
+	objectPath := filepath.Join(fs3VolumeAddress, config.Bucket, config.Object)
 	//commandArgs = []string{"client", "import", objectPath}
 	//dataCID, err := exec.Command("lotus",commandArgs...).Output()
 	commandLine := "lotus " + "client " + "import " + objectPath
@@ -92,15 +86,6 @@ func proposeImportData(config ImportOnlineDealData) {
 	}
 	outStr := strings.Fields(string(dataCID))
 	dataCIDStr := outStr[len(outStr)-1]
-
-	if err != nil {
-		errorIf(errDummy(), err.Error())
-	} else {
-		fmt.Println(fmt.Sprintf("Bucket: %s, Object: %s, DataCid: %s", config.Bucket, config.Object, dataCIDStr))
-	}
+	fmt.Println(fmt.Sprintf("Bucket: %s, Object: %s, DataCid: %s", config.Bucket, config.Object, dataCIDStr))
+	return
 }
-
-
-
-
-

@@ -303,6 +303,7 @@ func checkSendOnlineArgs(ctx *cli.Context) (string, string, string, string, stri
 	for _, arg := range args {
 		if strings.TrimSpace(arg) == "" {
 			fatalIf(errInvalidArgument().Trace(args...), "Unable to validate empty argument.")
+			return "", "", "", "", "", "", ""
 		}
 	}
 	wallet := strings.TrimSpace(ctx.String("from"))
@@ -379,12 +380,6 @@ func proposeOfflineDeal(config *OfflineDeal) {
 
 func proposeOnlineDeal(config OnlineDeal) {
 
-	//var commandArgs []string
-	//commandArgs = []string{"client", "deal", "--from", config.SenderWallet, "--verified-deal=", config.VerifiedDeal,
-	//"--fast-retrieval=", config.FastRetrieval, config.DataCid,
-	//config.MinerId, config.Cost, config.Duration}
-	//dealCID, err := exec.Command("lotus",commandArgs...).Output()
-
 	commandLine := "lotus " + "client " + "deal " + "--from " + config.SenderWallet + " --verified-deal=" + config.VerifiedDeal +
 		" --fast-retrieval=" + config.FastRetrieval + " " + config.DataCid + " " + config.MinerId + " " + config.Cost + " " + config.Duration
 	dealCID, err := ExecCommand(commandLine)
@@ -394,6 +389,7 @@ func proposeOnlineDeal(config OnlineDeal) {
 	} else {
 		fmt.Println(fmt.Sprintf("Wallet: %s, VerifiedDeal: %s, FastRetrieval: %s, DataCid: %s,MinerID: %s, Price: %s, Duration %s, DealCid: %s", config.SenderWallet, config.VerifiedDeal, config.FastRetrieval, config.DataCid, config.MinerId, config.Cost, config.Duration, strings.TrimSuffix(string(dealCID), "\n")))
 	}
+	return
 }
 
 func readCsv(filepath string) []*OfflineDeal {
@@ -516,6 +512,7 @@ func uploadCsv(csvPath string, targetFolder string, cliCtx *cli.Context) {
 	if e != nil {
 		fatalIf(probe.NewError(e).Untrace(), e.Error())
 	}
+	return
 }
 
 func ExecCommand(strCommand string) (string, error) {
@@ -532,7 +529,7 @@ func ExecCommand(strCommand string) (string, error) {
 	}
 	if err := cmd.Wait(); err != nil {
 		logs.GetLogger().Error("Execute failed when Wait:" + err.Error())
-		//return "", err
+		return "", err
 	}
 	return string(out_bytes), nil
 }

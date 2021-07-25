@@ -27,6 +27,7 @@ import (
 const (
 	defaultAccessKey = "YOUR-ACCESS-KEY-HERE"
 	defaultSecretKey = "YOUR-SECRET-KEY-HERE"
+	defaultVolumeAddress = "~/minio-data"
 )
 
 var (

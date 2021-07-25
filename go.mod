@@ -26,9 +26,11 @@ require (
 	github.com/pkg/xattr v0.4.1
 	github.com/posener/complete v1.2.3
 	github.com/prometheus/client_golang v1.8.0
+	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/rjeczalik/notify v0.9.2
 	github.com/rs/xid v1.2.1
 	github.com/shirou/gopsutil/v3 v3.21.3
+	github.com/sirupsen/logrus v1.8.0
 	github.com/tidwall/gjson v1.7.5
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	golang.org/x/net v0.0.0-20210421230115-4e50805a0758

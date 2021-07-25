@@ -49,7 +49,7 @@ Source installation is only intended for developers and advanced users. If you d
 git submodule update --init --recursive
 make ffi
 GO111MODULE=on go get github.com/filswan/fs3-mc
-go build -o ./build/mc
+go build -o ./mc
 ```
 
 ## Add a Cloud Storage Service
@@ -58,7 +58,7 @@ If you are planning to use `mc` only on POSIX compatible filesystems, you may sk
 To add one or more Amazon S3 compatible hosts, please follow the instructions below. `mc` stores all its configuration information in ``~/.mc/config.json`` file.
 
 ```
-mc alias set <ALIAS> <YOUR-S3-ENDPOINT> <YOUR-ACCESS-KEY> <YOUR-SECRET-KEY> --api <API-SIGNATURE> --path <BUCKET-LOOKUP-TYPE>
+./mc alias set <ALIAS> <YOUR-S3-ENDPOINT> <YOUR-ACCESS-KEY> <YOUR-SECRET-KEY> --api <API-SIGNATURE> --path <BUCKET-LOOKUP-TYPE>
 ```
 
 <ALIAS> is simply a short name to your cloud storage service. S3 end-point, access and secret keys are supplied by your cloud storage provider. API signature is an optional argument. By default, it is set to "S3v4".
@@ -69,14 +69,14 @@ Path is an optional argument. It is used to indicate whether dns or path style u
 MinIO server displays URL, access and secret keys.
 
 ```
-mc alias set minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
+./mc alias set minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
 ```
 
 ### Example - Amazon S3 Cloud Storage
 Get your AccessKeyID and SecretAccessKey by following [AWS Credentials Guide](http://docs.aws.amazon.com/general/latest/gr/aws-security-credentials.html).
 
 ```
-mc alias set s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
+./mc alias set s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
 ```
 
 **Note**: As an IAM user on Amazon S3 you need to make sure the user has full access to the buckets or set the following restricted policy for your IAM user
@@ -110,7 +110,7 @@ mc alias set s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJ
 Get your AccessKeyID and SecretAccessKey by following [Google Credentials Guide](https://cloud.google.com/storage/docs/migrating?hl=en#keys)
 
 ```
-mc alias set gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
+./mc alias set gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12
 ```
 
 ## Test Your Setup
@@ -134,51 +134,118 @@ Make a bucket
 
 *Example:*
 ```
-mc mb play/mybucket
+./mc mb play/mybucket
 Bucket created successfully `play/mybucket`.
 ```
 
 Copy Objects
 `cp` command copies data from one or more sources to a target.
 
+Note
+
 *Example:*
 ```
-mc cp myobject.txt play/mybucket
+./mc cp myobject.txt play/mybucket
 myobject.txt:    14 B / 14 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  100.00 % 41 B/s 0
 ```
 
 ## How to use    
-### Send a deal
-you may send an online deal to a miner
+
 #### Prepare your environment
  - A running lotus node at local
  - A filecoin wallet with sufficient balance to send deal, set as environment variable $FIL_WALLET
- - MinIO credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
+ - FS3 Server credentials set as environment variables $ENDPOINT, $ACCESS_KEY, $SECRET_KEY
+
+### Upload files to FS3 server
+#### Export environment variables
+Environment variables `ENDPOINT`, `ACCESS_KEY`, `SECRET_KEY` need to be set for FS3 Server authorization and usage.
+``` bash 
+# export FS3 Serve Endpoint
+export ENDPOINT=<FS3_SERER_ENDPOINT>
+
+# export FS3 Server Access Key
+export ACCESS_KEY=<FS3_SERVER_ACCESS_KEY>
+
+# export FS3 Server SECRET Key
+export SECRET_KEY=<FS3_SERVER_SECRET_KEY>
+```
+
+Example: 
+``` bash 
+# export FS3 Serve Endpoint
+export ENDPOINT=http://FS3_SERVER_URL:PORT
+
+# export FS3 Server Access Key
+export ACCESS_KEY=minioadmin
+
+# export FS3 Server SECRET Key
+export SECRET_KEY=minioadmin
+```
+
+#### Upload local files to FS3 Server
+
+Note: The FS3 server must be running when doing the uploading process. Make sure it is runing before uploading files.
+
+You can simply upload a local file to the designated bucket of FS3 Server using `mc` with `cp`
+``` bash 
+./mc cp PATH/TO/LOCAL/FILE minio/BUCKET
+```
+
+Example:
+``` bash 
+# Upload test.txt to bucket 'test_bucket'
+./mc cp /tmp/test/test.txt minio/test_bucket
+```
+
+### Send online deals
+you may send an online deal to a miner
+
+#### Export environment variables
+A wallet address is a must for sending deals to miner. You can change it via setting environment variable `FIL_WALLET`. Or you can set it up as an augment passing to `mc` when sending deals.
+``` bash 
+# export wallet address
+export FIL_WALLET=<MY_FIL_WALLET>
+```
+
+
 
 #### Import file stored in FS3
-Upload the CAR file to Filecoin, then you can share it to your miner
+Import the file stored in FS3 to Filecoin, then you can share it to your miner
 
-```mc import /path/to/FS3_file```
+```bash
+./mc import --bucket [bucket] --object [object]
+```
 
-#### Send online deal
+For example:
+```bash
+./mc import --bucket testBucket --object test.zip
+```
+
+Note:
+The `defaultVolumeAddress` where fs3 store the uploaded data is `~/minio-data`. It can be changed in file `fs3-mc/cmd/Config-v10.go`
+
+A message that contains `Bucket`,`Object` and `Datacid` will be returned if successful.
+
+#### Send online deal to miner
 `sendonline` command can send an online deal to a designated miner, a fully synchronized lotus node at local is required
 
 ```
---data-cid
---miner-id
---from: specify filecoin wallet to use, default: $FIL_WALLET
+--from: (optional) specify filecoin wallet to use, default: $FIL_WALLET
 --verified-deal: specify whether deal is verified, default: "false" ('true' if verified)
 --fast-retrieval: specify data retrieval type, defalult: 'true' ('false' if not using fast retrieval approach)   
+--data-cid: specify the valid data-cid for sending deal
+--miner-id: specify which miner to send deal to
 --price: specify the deal price for each GiB of file, default: 0
---duration: specify length in day to store the file, default: 365
+--duration: specify length in day to store the file, default: 1036800
 ```
 
 *Example:*    
     
-```
-mc sendonline --from f3tektw5tqjnxbcdybn21dx9123tdrndvvcu5w7usx7m3exqsfkxezncpefsf6fmianjvwkc2qw --data-cid bafykbzacedcum7rj3z24wi2fexmvrw5aefllqsixl5ozbqtpexmds2snknbl2 --miner-id t03354
+```bash
+./mc sendonline --from nusx7m3exqsfkxezncpefsf6fmian --verified-deal false --fast-retrieval true --data-cid m7xmefllqsixl5 --miner-id t00001 --price 0.00005 --duration 1036800
 ```
 
+A message that contains all the deal information and `Dealcid` will be returned if successful.
 <a name="everyday-use"></a>
 ## Everyday Use
 

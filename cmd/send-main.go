@@ -4,10 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/filswan/fs3-mc/logs"
+	"github.com/filswan/fs3-mc/pkg/probe"
 	"github.com/google/uuid"
 	"github.com/minio/cli"
-	"github.com/filswan/fs3-mc/pkg/probe"
 	csv "github.com/minio/minio/pkg/csvparser"
+	"io/ioutil"
 	"math/big"
 	"os"
 	"os/exec"
@@ -18,11 +20,15 @@ import (
 )
 
 var (
-	defaultStart    = 7
-	defaultDuration = 365
-	epochPerHour    = 120
-	GiBToByte       = 1024 * 1024 * 1024
-	aliasName       = "swanminio"
+	defaultStart          = 7
+	defaultDuration       = 360
+	epochPerHour          = 120
+	GiBToByte             = 1024 * 1024 * 1024
+	aliasName             = "swanminio"
+	defaultOnlineDuration = "1036800"
+	defaultVerifiedDeal   = "false"
+	defaultFastRetrieval  = "true"
+	defaultOnlinePrice    = "0"
 )
 
 type OfflineDeal struct {
@@ -39,9 +45,23 @@ type OfflineDeal struct {
 	Filename      string
 }
 
+type OnlineDeal struct {
+	SenderWallet  string
+	VerifiedDeal  string
+	FastRetrieval string
+	DataCid       string
+	MinerId       string
+	Cost          string
+	Duration      string
+}
+
 func NewOfflineDeal() *OfflineDeal {
 	return &OfflineDeal{FastRetrieval: true}
 }
+
+//func NewOnlineDeal() *OnlineDeal {
+//return &OnlineDeal{FastRetrieval: "true"}
+//}
 
 var sendCmd = cli.Command{
 	Name:         "send",
@@ -51,6 +71,33 @@ var sendCmd = cli.Command{
 	Before:       setGlobalsFromContext,
 	Subcommands:  nil,
 	Flags:        sendFlags,
+}
+
+var sendOnlineCmd = cli.Command{
+	Name:         "sendonline",
+	Usage:        "send filecoin online deal",
+	Action:       mainSendOnline,
+	OnUsageError: onUsageError,
+	Before:       setGlobalsFromContext,
+	Subcommands:  nil,
+	Flags:        sendOnlineFlags,
+}
+
+func mainSendOnline(ctx *cli.Context) error {
+	wallet, verifiedDeal, fastRetrieval, datacid, miner, duration, price := checkSendOnlineArgs(ctx)
+
+	onlineDealConfigs := OnlineDeal{
+		SenderWallet:  wallet,
+		VerifiedDeal:  verifiedDeal,
+		FastRetrieval: fastRetrieval,
+		DataCid:       datacid,
+		MinerId:       miner,
+		Cost:          price,
+		Duration:      duration,
+	}
+	proposeOnlineDeal(onlineDealConfigs)
+
+	return nil
 }
 
 func mainSend(ctx *cli.Context) error {
@@ -145,6 +192,42 @@ var sendFlags = []cli.Flag{
 	},
 }
 
+var sendOnlineFlags = []cli.Flag{
+	cli.StringFlag{
+		Name:   "from",
+		EnvVar: "FIL_WALLET",
+		Usage:  "specify filecoin wallet to use, default ",
+	},
+	cli.StringFlag{
+		Name:  "verified-deal",
+		Value: defaultVerifiedDeal,
+		Usage: "specify whether deal is verified",
+	},
+	cli.StringFlag{
+		Name:  "fast-retrieval",
+		Value: defaultFastRetrieval,
+		Usage: "specify whether using fast retrieval",
+	},
+	cli.StringFlag{
+		Name:  "data-cid",
+		Usage: "specify the valid data-cid for sending deal",
+	},
+	cli.StringFlag{
+		Name:  "miner-id",
+		Usage: "specify which miner to send deal to",
+	},
+	cli.StringFlag{
+		Name:  "price",
+		Value: defaultOnlinePrice,
+		Usage: "specify the deal price for each GiB of file",
+	},
+	cli.StringFlag{
+		Name:  "duration",
+		Value: defaultOnlineDuration,
+		Usage: "specify length in day to store the file",
+	},
+}
+
 func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.Float) {
 	args := ctx.Args()
 	for _, arg := range args {
@@ -215,6 +298,42 @@ func checkSendArgs(ctx *cli.Context) (string, uint, uint, string, string, *big.F
 	return wallet, start, duration, miner, input, priceDecimal
 }
 
+func checkSendOnlineArgs(ctx *cli.Context) (string, string, string, string, string, string, string) {
+	args := ctx.Args()
+	for _, arg := range args {
+		if strings.TrimSpace(arg) == "" {
+			fatalIf(errInvalidArgument().Trace(args...), "Unable to validate empty argument.")
+			return "", "", "", "", "", "", ""
+		}
+	}
+	wallet := strings.TrimSpace(ctx.String("from"))
+	if len(wallet) < 1 {
+		wallet = os.Getenv("FIL_WALLET")
+	}
+	if len(wallet) < 1 {
+		fatalIf(errInvalidArgument().Trace(wallet), "please provide a valid wallet")
+		return "", "", "", "", "", "", ""
+	}
+
+	verifiedDeal := strings.TrimSpace(ctx.String("verified-deal"))
+	fastRetrieval := strings.TrimSpace(ctx.String("fast-retrieval"))
+	datacid := ctx.String("data-cid")
+	miner := ctx.String("miner-id")
+	duration := ctx.String("duration")
+	price := ctx.String("price")
+
+	if len(duration) == 0 {
+		fatalIf(errInvalidArgument(), "please provide a valid length of duration in day")
+		return "", "", "", "", "", "", ""
+	}
+	if len(price) == 0 {
+		fatalIf(errInvalidArgument(), "please provide a valid price")
+		return "", "", "", "", "", "", ""
+	}
+
+	return wallet, verifiedDeal, fastRetrieval, datacid, miner, duration, price
+}
+
 func getCurrentEpoch() uint {
 	sec := time.Now().Unix()
 	currentEpoch := uint((sec - 1598306471) / 30)
@@ -257,6 +376,20 @@ func proposeOfflineDeal(config *OfflineDeal) {
 		config.DealCid = strings.TrimSuffix(string(stdout), "\n")
 		fmt.Println(fmt.Sprintf("DataCid: %s, DealCid: %s", config.DataCid, config.DealCid))
 	}
+}
+
+func proposeOnlineDeal(config OnlineDeal) {
+
+	commandLine := "lotus " + "client " + "deal " + "--from " + config.SenderWallet + " --verified-deal=" + config.VerifiedDeal +
+		" --fast-retrieval=" + config.FastRetrieval + " " + config.DataCid + " " + config.MinerId + " " + config.Cost + " " + config.Duration
+	dealCID, err := ExecCommand(commandLine)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	} else {
+		fmt.Println(fmt.Sprintf("Wallet: %s, VerifiedDeal: %s, FastRetrieval: %s, DataCid: %s,MinerID: %s, Price: %s, Duration %s, DealCid: %s", config.SenderWallet, config.VerifiedDeal, config.FastRetrieval, config.DataCid, config.MinerId, config.Cost, config.Duration, strings.TrimSuffix(string(dealCID), "\n")))
+	}
+	return
 }
 
 func readCsv(filepath string) []*OfflineDeal {
@@ -379,4 +512,24 @@ func uploadCsv(csvPath string, targetFolder string, cliCtx *cli.Context) {
 	if e != nil {
 		fatalIf(probe.NewError(e).Untrace(), e.Error())
 	}
+	return
+}
+
+func ExecCommand(strCommand string) (string, error) {
+	cmd := exec.Command("/bin/bash", "-c", strCommand)
+	stdout, _ := cmd.StdoutPipe()
+	if err := cmd.Start(); err != nil {
+		logs.GetLogger().Error("Execute failed when Start:" + err.Error())
+		return "", err
+	}
+	out_bytes, _ := ioutil.ReadAll(stdout)
+	if err := stdout.Close(); err != nil {
+		logs.GetLogger().Error("Execute failed when close stdout:" + err.Error())
+		return "", err
+	}
+	if err := cmd.Wait(); err != nil {
+		logs.GetLogger().Error("Execute failed when Wait:" + err.Error())
+		return "", err
+	}
+	return string(out_bytes), nil
 }

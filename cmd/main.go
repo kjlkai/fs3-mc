@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/filswan/fs3-mc/logs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -33,8 +34,8 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb"
-	"github.com/minio/cli"
 	"github.com/filswan/fs3-mc/pkg/probe"
+	"github.com/minio/cli"
 	"github.com/minio/minio/pkg/console"
 	"github.com/minio/minio/pkg/trie"
 	"github.com/minio/minio/pkg/words"
@@ -78,6 +79,8 @@ VERSION:
 
 // Main starts mc application
 func Main(args []string) {
+
+	logs.InitLogger()
 
 	if len(args) > 1 {
 		switch args[1] {
@@ -438,6 +441,8 @@ var appCmds = []cli.Command{
 	listCmd,
 	carCmd,
 	sendCmd,
+	sendOnlineCmd,
+	importCmd,
 }
 
 func registerApp(name string) *cli.App {

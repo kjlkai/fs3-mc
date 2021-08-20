@@ -1,5 +1,6 @@
 node {
-
+	def timestamp
+	
 	stage('Checkout') {
 
 		checkout scm
@@ -8,7 +9,7 @@ node {
 
 	stage('Archive') {
 
-		def timestamp = new Date().format('yyyyMMdd')
+		timestamp = new Date().format('yyyyMMdd')
 
 		zip archive: true, zipFile: "$timestamp-output.zip"
 

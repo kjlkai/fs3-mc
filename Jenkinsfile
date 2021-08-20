@@ -9,7 +9,7 @@ node {
 
 	stage('Archive') {
 
-		timestamp = new Date().format('yyyyMMdd')
+		timestamp = new Date().format('yyyyMMdd-HH:mm:ss.SSS')
 
 		zip archive: true, zipFile: "$timestamp-output.zip"
 
